@@ -1,0 +1,16 @@
+{
+  "name": "gjtorikian-plugins",
+  "version": "0.1.0",
+  "description": "A collection of Claude Code plugins for gjtorikian",
+  "owner": {
+    "name": "Garen J. Torikian",
+    "github": "gjtorikian"
+  },
+  "plugins": [
+    {
+      "name": "essentials",
+      "source": "./plugins/essentials",
+      "description": "Essential commands for enhanced Claude Code workflows."
+    }
+  ]
+}
