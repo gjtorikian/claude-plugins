@@ -1,0 +1,10 @@
+{
+  "name": "agents",
+  "version": "0.1.0",
+  "description": "Agent workflow commands for session handoffs.",
+  "commands": ["./commands/"],
+  "author": {
+    "name": "Garen Torikian"
+  },
+  "keywords": []
+}

@@ -8,6 +8,12 @@
   },
   "plugins": [
     {
+      "name": "agents",
+      "source": "./plugins/agents",
+      "description": "Agent workflow commands for session handoffs.",
+      "version": "0.1.0"
+    },
+    {
       "name": "git",
       "source": "./plugins/git",
       "description": "Git workflow commands for commits",

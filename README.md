@@ -15,6 +15,7 @@ Then install plugins:
 ```
 /plugin install git@gjtorikian-plugins
 /plugin install github@gjtorikian-plugins
+/plugin install agents@gjtorikian-plugins
 ```
 
 Update at will:
@@ -23,6 +24,7 @@ Update at will:
 /plugin marketplace update gjtorikian-plugins
 /plugin update git@gjtorikian-plugins
 /plugin update github@gjtorikian-plugins
+/plugin update agents@gjtorikian-plugins
 ```
 
 ## Available Plugins
@@ -31,6 +33,7 @@ Update at will:
 | ------------------------------ | -------------------------------------------- |
 | [git](./plugins/git)           | Git workflow commands for commits             |
 | [github](./plugins/github)     | GitHub workflow commands for pull requests    |
+| [agents](./plugins/agents)     | AI agent workflow commands for session handoffs |
 
 ## Scripts
 
