@@ -1,0 +1,9 @@
+{
+  "name": "gjtorikian-claude-plugins",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync": "npx tsx scripts/sync.ts",
+    "new": "npx tsx scripts/new-plugin.ts"
+  }
+}

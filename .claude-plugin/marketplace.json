@@ -8,9 +8,16 @@
   },
   "plugins": [
     {
-      "name": "essentials",
-      "source": "./plugins/essentials",
-      "description": "Essential commands for enhanced Claude Code workflows."
+      "name": "git",
+      "source": "./plugins/git",
+      "description": "Git workflow commands for commits.",
+      "version": "0.3.1"
+    },
+    {
+      "name": "github",
+      "source": "./plugins/github",
+      "description": "GitHub workflow commands for pull requests.",
+      "version": "0.1.0"
     }
   ]
 }

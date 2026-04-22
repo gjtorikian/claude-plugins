@@ -1,0 +1,8 @@
+{
+  "name": "github",
+  "version": "0.1.0",
+  "description": "GitHub workflow commands for pull requests",
+  "commands": [
+    "./commands/"
+  ]
+}
