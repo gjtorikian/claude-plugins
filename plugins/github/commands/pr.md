@@ -31,7 +31,11 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
 ### Phase 3: Generate Description
 
 7. Analyze all changes and generate a PR title and description:
-   - **Title**: Short (under 70 chars), imperative mood, captures the overall change
+   - **Title**: Must start with a conventional commit type prefix — `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`, `ci:`, `build:`, `perf:`, or `style:`. Append `!` before the colon for breaking changes (e.g., `feat!:`). Choose the type that best describes the _overall_ PR:
+     - If all commits share the same type, use that type
+     - If commits mix types, pick the most significant one (features outweigh chores, fixes outweigh style)
+     - A scope is optional: `feat(auth): Add OAuth2 login`
+     - Keep the full title under 70 characters, imperative mood
    - **Summary**: 3-5 bullet points of what changed and _why_ (pull motivation from commit bodies and session context)
    - **Test plan**: Checklist of verification steps
 8. Use `AskUserQuestion` to present the title and description for approval. Use the `preview` field to show the full formatted output. Options:
@@ -46,7 +50,7 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
 10. Run `gh pr create` with the approved title and description:
 
 ```bash
-gh pr create --title "the pr title" --body "$(cat <<'EOF'
+gh pr create --title "feat(auth): Add OAuth2 login support" --body "$(cat <<'EOF'
 ## Summary
 - Change 1
 - Change 2
