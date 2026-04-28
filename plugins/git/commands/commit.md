@@ -8,7 +8,6 @@ Generate well-crafted commit messages and create Git commits following The Seven
 
 ## Hard Rules
 
-- Require explicit user approval via `AskUserQuestion` before every `git commit` — committing is irreversible and the user may need to review staging.
 - Every `git commit` command must include a conventional type prefix (e.g., `feat:`, `fix(scope):`) — the git hook blocks commits without one.
 - Never add a `Co-Authored-By` trailer unless the user explicitly requests it.
 - Warn before staging files that look like secrets (.env, \*.pem, id_rsa, credentials, tokens, keys).
@@ -46,17 +45,9 @@ Generate well-crafted commit messages and create Git commits following The Seven
 10. Draft each commit message with the subject and a body that explains the _why_
 11. **Update each commit's Task** with the final draft message (TaskUpdate), if Tasks were created
 
-### Phase 4: Approve Each Message
+### Phase 4: Approve Each Message (multi-commit only)
 
-12. Use `AskUserQuestion` to present each draft commit message for approval. Use the `preview` field to show the full formatted message. Options:
-    - "Approve" — use as-is
-    - "Edit subject" — user provides new subject via Other
-    - "Edit body" — user provides new body via Other
-    - "Skip this commit" — exclude from the batch
-
-### Phase 5: Final Review (multi-commit only)
-
-13. If multiple commits were approved, use `AskUserQuestion` for a final review:
+12. If multiple commits were approved, use `AskUserQuestion` for a final review:
     - "Commit all as shown" — proceed in order
     - "Combine some commits" — user describes which to merge
     - "Reorder commits" — user describes new order
@@ -64,11 +55,11 @@ Generate well-crafted commit messages and create Git commits following The Seven
 
 ### Phase 6: Execute
 
-14. For each approved commit:
+13. For each approved commit:
     - Stage the relevant files (`git add <specific-files>` or `git add -p`)
     - Run `git commit` with the approved message (see Executing the Commit below for format)
     - **Mark the commit's Task as completed** (TaskUpdate with status `completed`), if Tasks were created
-15. Show the final result (`git log --oneline` for the new commits)
+14. Show the final result (`git log --oneline` for the new commits)
 
 ## Executing the Commit
 
