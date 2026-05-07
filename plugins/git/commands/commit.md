@@ -11,8 +11,8 @@ Generate well-crafted commit messages and create Git commits following The Seven
 - Every `git commit` command must include a conventional type prefix (e.g., `feat:`, `fix(scope):`) — the git hook blocks commits without one.
 - Never add a `Co-Authored-By` trailer unless the user explicitly requests it.
 - Warn before staging files that look like secrets (.env, \*.pem, id_rsa, credentials, tokens, keys).
-- Do not write a body that restates the diff. The diff is already visible and a body that describes what changed adds zero information. If you cannot articulate the why, ask the user.
-- When motivation is unclear, use `AskUserQuestion` rather than defaulting to a description of what changed. A body that says "refactored X" is indistinguishable from no body at all.
+- Do not write a body that restates the diff. The diff is already visible and a body that describes what changed adds zero information. If you cannot articulate the why, omit the body and write a subject-only commit.
+- When motivation is unclear, default to a subject-only commit rather than describing what changed. A body that says "refactored X" is indistinguishable from no body at all. Only ask the user about motivation if they have explicitly requested a body or the change is large enough that future readers will clearly need context.
 - Match the existing commit style in the repository when possible.
 - When describing commands (`npm run`, `curl -X`, etc) wrap them in backticks so they appear as Markdown code
 
@@ -26,11 +26,12 @@ Generate well-crafted commit messages and create Git commits following The Seven
 
 ### Phase 2: Plan Commit Strategy
 
-4. **Evaluate if changes should be split** into multiple logical commits (see Splitting Commits below)
-5. If splitting is warranted, use `AskUserQuestion` to present the proposed split as options:
+4. **Evaluate if changes should be split** into multiple logical commits (see Splitting Commits below). Default to a single commit unless the diff clearly spans unrelated concerns (e.g. a bug fix in one module plus a feature in another). Tightly related changes — even across several files — should stay together.
+5. Only if the diff clearly contains multiple unrelated changes, use `AskUserQuestion` to confirm the proposed split:
    - Option per proposed grouping (e.g. "Commit 1: auth refactor, Commit 2: payment fix")
    - Option to keep as single commit
    - User can select "Other" to describe a different split
+   Otherwise, proceed as a single commit without prompting.
 6. **If there are 2 or more planned commits**, create a Task for each one using TaskCreate. This is critical for multi-commit workflows — they often happen at the end of a session when context is low and Tasks survive compaction. Include in each task the files to stage, draft subject line, and motivation (if known). For a single commit, skip Task creation.
 7. For each planned commit, draft a subject line and body following the rules in Phase 3
 
@@ -41,17 +42,13 @@ Generate well-crafted commit messages and create Git commits following The Seven
    - **Task descriptions** — if work was tracked via Tasks during the session, they often capture intent
    - **PR descriptions, issue references, or TODO comments** in the diff
    - **The broader repository context** — why this approach was chosen over alternatives
-9. **If the motivation is still unclear** — you MUST use `AskUserQuestion` to ask the user why the change was made. Do not guess or fall back to describing _what_ changed. Example question: "What motivated this change?" or "Why was this approach chosen?"
-10. Draft each commit message with the subject and a body that explains the _why_
+9. **If the motivation is still unclear**, default to a subject-only commit. Do not guess at a body, and do not prompt the user unless the change is large or non-obvious enough that a future reader will clearly need the context. A clear subject is better than an interruption.
+10. Draft each commit message with the subject and, only when motivation is known, a body that explains the _why_
 11. **Update each commit's Task** with the final draft message (TaskUpdate), if Tasks were created
 
-### Phase 4: Approve Each Message (multi-commit only)
+### Phase 4: Execute Multi-Commit Batches
 
-12. If multiple commits were approved, use `AskUserQuestion` for a final review:
-    - "Commit all as shown" — proceed in order
-    - "Combine some commits" — user describes which to merge
-    - "Reorder commits" — user describes new order
-    - "Start over" — go back to Phase 3
+12. For multi-commit batches, proceed through commits in order without a separate approval prompt. The split was already confirmed in Phase 2.
 
 ### Phase 6: Execute
 
