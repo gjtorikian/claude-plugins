@@ -9,10 +9,11 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
 
 ## Hard Rules
 
-- Do not create the PR without showing the generated description and getting explicit user approval via `AskUserQuestion` — the description is the primary deliverable.
+- Do not create the PR without the user approving the title and description in their editor — the description is the primary deliverable. Open the draft in the user's configured editor and use exactly what they save. Do not ask for approval in chat with `AskUserQuestion`.
 - Always push the branch before creating the PR (`gh pr create` requires a remote-tracking branch).
-- Use HEREDOC syntax for PR body to preserve formatting.
+- Pass the PR body via `--body-file` (not `--body`) so the user's edited Markdown is preserved verbatim.
 - If the base branch is not main or master, use `AskUserQuestion` to ask which branch to target before generating the description.
+- Never add a `Co-Authored-By` trailer unless the user explicitly requests it.
 
 ## Process
 
@@ -38,30 +39,31 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
      - Keep the full title under 70 characters, imperative mood
    - **Summary**: 3-5 bullet points of what changed and _why_ (pull motivation from commit bodies and session context)
    - **Test plan**: Checklist of verification steps
-8. Use `AskUserQuestion` to present the title and description for approval. Use the `preview` field to show the full formatted output. Options:
-   - "Create PR as shown" — proceed
-   - "Edit title" — user provides new title via Other
-   - "Edit description" — user provides new description via Other
-   - "Cancel" — abort
+8. Write the draft to a temp file in the scratchpad for the user's final approval — **title on line 1**, a blank line, then the Markdown body (`## Summary`, `## Test plan`). Open it in the user's editor as a **background** Bash command so the editor wait does not hit the foreground timeout (it re-invokes you when the tab closes). Invoke the user's configured editor generically so this works on any machine:
+
+   ```bash
+   ${VISUAL:-${EDITOR:-$(git config --get core.editor)}} /path/to/scratchpad/pr-draft.md
+   ```
+
+   (Their editor value — e.g. `code --wait` — word-splits into command + flag, and the `--wait` blocks until the tab closes.) The editor is the approval step — do not prompt for approval in chat.
+
+9. When the editor returns, read `pr-draft.md` back:
+   - First non-empty line → the PR **title**. Everything after the following blank line → the PR **body**.
+   - If the file is empty (user cleared it to cancel), report the cancellation and stop.
+   - Confirm the title still starts with a conventional type prefix; if the user removed it, re-add the most appropriate one.
+   - Write the body portion to its own file (e.g. `pr-body.md`) for `--body-file`.
 
 ### Phase 4: Push and Create
 
-9. Push with `git push -u origin HEAD`. Show the command output.
-10. Run `gh pr create` with the approved title and description:
+10. Push with `git push -u origin HEAD`. Show the command output.
+11. Run `gh pr create` with the edited title and body:
 
-```bash
-gh pr create --title "feat(auth): Add OAuth2 login support" --body "$(cat <<'EOF'
-## Summary
-- Change 1
-- Change 2
-
-## Test plan
-- [ ] Verify change 1
-- [ ] Verify change 2
-EOF
-)"
-```
+    ```bash
+    gh pr create --title "feat(auth): Add OAuth2 login support" --body-file /path/to/scratchpad/pr-body.md
+    ```
 
 12. If `gh pr create` fails, show the full error output and stop. Do not retry.
 13. Update the Task with the PR URL and mark as completed (`TaskUpdate`).
 14. Return the PR URL to the user.
+
+If `core.editor`/`$EDITOR` is a terminal editor (`vim`, `nano`) with no blocking GUI flag, it cannot open inside a background Bash call. In that case, tell the user to edit the draft themselves via the session's `!` prefix (e.g. `! $EDITOR /path/to/scratchpad/pr-draft.md`) so their terminal editor gets a real TTY, then continue once they confirm.
