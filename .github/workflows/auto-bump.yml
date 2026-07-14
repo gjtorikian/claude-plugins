@@ -1,0 +1,148 @@
+name: Auto-bump plugin versions
+
+# When a plugin's content changes on main, bump that plugin's patch version so
+# the version string (the cache key Claude Code installs by) changes and users
+# actually receive the update. Without a bump, edits silently go stale in the
+# installed plugin cache.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/**'
+
+# contents: write is required to push the bump commit back to main.
+permissions:
+  contents: write
+
+# Serialize runs so two quick pushes can't race on the same push+commit.
+concurrency:
+  group: auto-bump-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          # Full history so we can diff this push (before..after).
+          fetch-depth: 0
+          # Default GITHUB_TOKEN is persisted for the push below. Pushes made
+          # with GITHUB_TOKEN do not trigger further workflow runs, which
+          # prevents this workflow from looping on its own bump commit.
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+
+      - name: Bump patch version of changed plugins
+        id: bump
+        run: |
+          set -euo pipefail
+
+          before="${{ github.event.before }}"
+          after="${{ github.sha }}"
+
+          # First push to the branch has an all-zero "before"; fall back to the
+          # commit's first parent so we still get a sensible diff.
+          if [ -z "$before" ] || [ "$before" = "0000000000000000000000000000000000000000" ]; then
+            before="${after}^"
+          fi
+
+          changed_files="$(git diff --name-only "$before" "$after")"
+          echo "Files changed in this push:"
+          echo "$changed_files"
+          echo
+
+          summary_file="$RUNNER_TEMP/bump-summary.txt"
+          : > "$summary_file"
+          bumped=0
+
+          for plugin_json in plugins/*/.claude-plugin/plugin.json; do
+            [ -f "$plugin_json" ] || continue
+            plugin_dir="$(dirname "$(dirname "$plugin_json")")"   # plugins/<name>
+
+            # All changes inside this plugin's directory.
+            changes_in_plugin="$(printf '%s\n' "$changed_files" | grep -E "^${plugin_dir}/" || true)"
+            if [ -z "$changes_in_plugin" ]; then
+              continue   # plugin untouched
+            fi
+
+            # If the ONLY change is the manifest itself, the author bumped (or
+            # edited) the version by hand — respect that, don't touch it.
+            non_manifest="$(printf '%s\n' "$changes_in_plugin" | grep -v "^${plugin_dir}/.claude-plugin/plugin.json$" || true)"
+            if [ -z "$non_manifest" ]; then
+              echo "$plugin_dir: only plugin.json changed — leaving version as-is."
+              continue
+            fi
+
+            current="$(jq -r '.version' "$plugin_json")"
+            base_version="$(git show "${before}:${plugin_json}" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "")"
+
+            # Brand-new plugin: keep its declared initial version.
+            if [ -z "$base_version" ] || [ "$base_version" = "null" ]; then
+              echo "$plugin_dir: new plugin — keeping initial version $current."
+              continue
+            fi
+
+            # Already bumped by hand in this same push: don't double-bump.
+            if [ "$current" != "$base_version" ]; then
+              echo "$plugin_dir: already bumped in this push ($base_version -> $current)."
+              continue
+            fi
+
+            # Increment the patch component (major.minor.PATCH).
+            new_version="$(printf '%s' "$current" | awk -F. 'NF==3 { print $1"."$2"."($3+1) }' OFS=.)"
+            if [ -z "$new_version" ]; then
+              echo "::warning file=$plugin_json::Version '$current' is not plain semver (major.minor.patch); skipping."
+              continue
+            fi
+
+            tmp="$(mktemp)"
+            jq --arg v "$new_version" '.version = $v' "$plugin_json" > "$tmp"
+            mv "$tmp" "$plugin_json"
+            echo "$plugin_dir: $current -> $new_version"
+            echo "$(basename "$plugin_dir"): $current -> $new_version" >> "$summary_file"
+            bumped=1
+          done
+
+          echo "bumped=$bumped" >> "$GITHUB_OUTPUT"
+          echo "summary_file=$summary_file" >> "$GITHUB_OUTPUT"
+
+      - name: Sync marketplace.json
+        if: steps.bump.outputs.bumped == '1'
+        run: npx --yes tsx scripts/sync.ts
+
+      - name: Commit and push bump
+        if: steps.bump.outputs.bumped == '1'
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add plugins/*/.claude-plugin/plugin.json .claude-plugin/marketplace.json
+
+          if git diff --cached --quiet; then
+            echo "Nothing staged after bump; skipping commit."
+            exit 0
+          fi
+
+          summary="$(cat "${{ steps.bump.outputs.summary_file }}")"
+          # [skip ci] is belt-and-suspenders; GITHUB_TOKEN pushes already do not
+          # retrigger workflows.
+          git commit -m "chore: Auto-bump plugin patch versions [skip ci]" -m "$summary"
+          git push
+
+      - name: Job summary
+        if: steps.bump.outputs.bumped == '1'
+        run: |
+          {
+            echo "### Auto-bumped plugins"
+            echo ""
+            echo '```'
+            cat "${{ steps.bump.outputs.summary_file }}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
