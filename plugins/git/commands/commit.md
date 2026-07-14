@@ -65,7 +65,7 @@ Branch on how many commits are planned. The editor is the approval step in both 
 Then, for either path:
 
 14. **Mark each commit's Task as completed** (TaskUpdate with status `completed`), if Tasks were created.
-15. Show the final result (`git log --oneline` for the new commits).
+15. Show the final result. Print the **full committed message** so the user sees exactly what landed even if they missed the editor tab — `git show -s --format=%B HEAD` for a single commit, or `git log --oneline` for a multi-commit batch. State that the commit is local and unpushed, and offer to amend the wording on request. Do not make the user run any command to review or revise — reopen the editor or take dictated edits yourself.
 
 ## Executing the Commit
 
@@ -73,7 +73,11 @@ The user's editor is the final say on wording. Always draft each message **with 
 
 **Run the editor step as a background Bash command.** GUI editors like `code --wait` block until the tab is closed, which can exceed the foreground Bash timeout; running in the background avoids the timeout and re-invokes you when the editor closes.
 
-If `core.editor`/`$EDITOR` is a terminal editor (`vim`, `nano`) rather than a GUI editor with a blocking flag, it cannot open inside a background Bash call. In that case, tell the user to run the editor step themselves via the session's `!` prefix (e.g. `! git commit -F <tempfile> -e`) so their terminal editor gets a real TTY.
+**Before launching the editor, post a one-line heads-up in chat** so the user knows to look for it — e.g. "Opening the commit message in VS Code now — switch to it, edit if you like, then **save and close the tab** to commit." A GUI tab can open behind the terminal unnoticed; without this warning the user may close it (or it auto-closes) without realizing it was the commit editor, silently committing your unreviewed draft.
+
+**After the editor closes, always echo the full committed message back in chat** (see step 15) — this is the reliable checkpoint even when the editor tab was missed. Never treat `git log --oneline` alone as sufficient confirmation.
+
+If `core.editor`/`$EDITOR` is a **terminal** editor (`vim`, `nano`) — not a GUI editor with a blocking flag — it cannot open inside a background Bash call. ONLY in that case, tell the user to run the editor step themselves via the session's `!` prefix (e.g. `! git commit -F <tempfile> -e`) so their terminal editor gets a real TTY. For a GUI editor (`code --wait`, `subl --wait`, etc.), never punt to `!` — open it for the user yourself as a background command.
 
 ### Single-Commit Approval
 
@@ -95,7 +99,7 @@ that was causing 40% drop-off during onboarding.
 
 Check the exit status when the background command returns:
 
-- **Success** → committed with the user's wording. Continue.
+- **Success** → committed. Echo the full final message back to the user (step 15). If the committed message is byte-for-byte identical to your draft, the user likely never saw the editor tab — say so explicitly and offer to reopen the editor or amend from dictated edits, rather than assuming silent approval.
 - **Non-zero with "empty commit message"** → the user cleared the message to cancel. Do not retry; report the cancellation and stop.
 - **Non-zero from the commit-msg hook** (e.g. the user removed the conventional prefix) → show the hook output and let the user decide; do not silently re-add and re-run.
 
