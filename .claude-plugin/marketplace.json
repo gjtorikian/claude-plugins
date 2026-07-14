@@ -17,13 +17,13 @@
       "name": "git",
       "source": "./plugins/git",
       "description": "Git workflow commands for commits",
-      "version": "0.1.0"
+      "version": "0.1.1"
     },
     {
       "name": "github",
       "source": "./plugins/github",
       "description": "GitHub workflow commands for pull requests",
-      "version": "0.1.0"
+      "version": "0.1.1"
     }
   ]
 }
