@@ -1,6 +1,6 @@
 ---
 name: pr
-description: Analyzes branch commits, generates a structured PR description with summary and test plan, then creates the PR via gh CLI. Use when the user asks to "open a PR", "create a pull request", "submit a PR", or push a branch for review. Do NOT use for creating commits — use /commit for that.
+description: Analyzes branch commits, generates a structured PR description, then creates the PR via gh CLI. Use when the user asks to "open a PR", "create a pull request", "submit a PR", or push a branch for review. Do NOT use for creating commits — use /commit for that.
 allowed-tools: [Bash, Read, Glob, Grep, AskUserQuestion, TaskCreate, TaskUpdate]
 argument-hint: "[base-branch]"
 ---
@@ -38,8 +38,7 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
      - A scope is optional: `feat(auth): Add OAuth2 login`
      - Keep the full title under 70 characters, imperative mood
    - **Summary**: 3-5 bullet points of what changed and _why_ (pull motivation from commit bodies and session context)
-   - **Test plan**: Checklist of verification steps
-8. Write the draft to a temp file in the scratchpad for the user's final approval — **title on line 1**, a blank line, then the Markdown body (`## Summary`, `## Test plan`). Open it in the user's editor as a **background** Bash command so the editor wait does not hit the foreground timeout (it re-invokes you when the tab closes). Invoke the user's configured editor generically so this works on any machine:
+8. Write the draft to a temp file in the scratchpad for the user's final approval — **title on line 1**, a blank line, then the Markdown body. Open it in the user's editor as a **background** Bash command so the editor wait does not hit the foreground timeout (it re-invokes you when the tab closes). Invoke the user's configured editor generically so this works on any machine:
 
    ```bash
    ${VISUAL:-${EDITOR:-$(git config --get core.editor)}} /path/to/scratchpad/pr-draft.md
