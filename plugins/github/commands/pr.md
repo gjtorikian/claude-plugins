@@ -13,6 +13,7 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
 - Always push the branch before creating the PR (`gh pr create` requires a remote-tracking branch).
 - Pass the PR body via `--body-file` (not `--body`) so the user's edited Markdown is preserved verbatim.
 - If the base branch is not main or master, use `AskUserQuestion` to ask which branch to target before generating the description.
+- Do not add a "Test" header section.
 - Never add a `Co-Authored-By` trailer unless the user explicitly requests it.
 
 ## Process
@@ -47,9 +48,8 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
    ```
 
    Then wait for the user to save, close, and confirm before reading the file back. Two things to get right:
-
-   - **Emit the resolved command literally; never paste an unquoted `${EDITOR}` expansion.** In zsh (a common default) unquoted parameter expansions are *not* word-split, so `${EDITOR} file` runs the whole `code --wait` as one command name → `command not found` (exit 127). Substitute the real value first.
-   - **Use the `!` prefix, not a Bash tool call.** Editors are often shell **aliases** (`code`, `subl`) absent from a non-interactive tool shell, and a GUI `--wait` editor needs a real terminal session to block — from a detached Bash tool call `code --wait` returns 0 *immediately* without opening, so you'd proceed with the unedited draft. The `!` prefix runs in the user's real terminal, where the alias resolves, `--wait` blocks, and a terminal editor gets a TTY. Only launch it yourself from a Bash tool call if the editor is a real `PATH` binary that opens here; if you do, treat exit 127 or an instant return with the file unchanged as "never opened" and fall back to `!`.
+   - **Emit the resolved command literally; never paste an unquoted `${EDITOR}` expansion.** In zsh (a common default) unquoted parameter expansions are _not_ word-split, so `${EDITOR} file` runs the whole `code --wait` as one command name → `command not found` (exit 127). Substitute the real value first.
+   - **Use the `!` prefix, not a Bash tool call.** Editors are often shell **aliases** (`code`, `subl`) absent from a non-interactive tool shell, and a GUI `--wait` editor needs a real terminal session to block — from a detached Bash tool call `code --wait` returns 0 _immediately_ without opening, so you'd proceed with the unedited draft. The `!` prefix runs in the user's real terminal, where the alias resolves, `--wait` blocks, and a terminal editor gets a TTY. Only launch it yourself from a Bash tool call if the editor is a real `PATH` binary that opens here; if you do, treat exit 127 or an instant return with the file unchanged as "never opened" and fall back to `!`.
 
 9. After the user saves and confirms, read `pr-draft.md` back:
    - First non-empty line → the PR **title**. Everything after the following blank line → the PR **body**.
