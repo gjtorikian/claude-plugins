@@ -23,7 +23,7 @@
       "name": "github",
       "source": "./plugins/github",
       "description": "GitHub workflow commands for pull requests",
-      "version": "0.1.3"
+      "version": "0.1.4"
     }
   ]
 }
