@@ -1,6 +1,6 @@
 ---
 name: commit
-description: "Creates git commits with conventional commit messages (type(scope): subject + why-focused body). Analyzes changes, proposes logical splits, and requires approval before executing. Do NOT use for pushing, creating PRs, or amending published commits."
+description: "Creates git commits with conventional commit messages (type(scope): subject + why-focused body). Analyzes changes, proposes logical splits, and commits directly without editor approval. Do NOT use for pushing, creating PRs, or amending published commits."
 allowed-tools: [Bash, Read, Glob, Grep, AskUserQuestion, TaskCreate, TaskUpdate]
 ---
 
@@ -16,7 +16,7 @@ Generate well-crafted commit messages and create Git commits following The Seven
   the message must explain the context and reasoning.
 - Match the existing commit style in the repository when possible.
 - When describing commands (`npm run`, `curl -X`, etc) wrap them in backticks so they appear as Markdown code
-- The user gets final say on wording in their editor. Present commit messages by opening them in the user's configured editor — a native `git commit -e` for a single commit, or one combined review file for a multi-commit split (see Executing the Commit) — not by describing them in chat or asking for approval with `AskUserQuestion`. Whatever the user saves is what gets committed.
+- Commit directly with your drafted message — do **not** open an editor for approval, and do not ask for message approval in chat with `AskUserQuestion`. The user trusts the generated wording; they can ask to amend afterwards. The only prompt in this workflow is the split confirmation in Phase 2.
 
 ## Process
 
@@ -50,44 +50,27 @@ Generate well-crafted commit messages and create Git commits following The Seven
 
 ### Phase 4: Execute
 
-Branch on how many commits are planned. The editor is the approval step in both cases — never prompt for message approval in chat.
+Commit directly with the drafted messages — do not open an editor and do not ask for message approval in chat.
 
-**Single commit** — use the native git editor:
+**Single commit:**
 
 12. Stage the relevant files (`git add <specific-files>` or `git add -p`).
-13. Write the drafted message to a temp file in the scratchpad and have the user open it for final approval by running `! git commit -F <tempfile> -e` (see Single-Commit Approval below).
+13. Write the drafted message to a temp file in the scratchpad and commit with `git commit -F <tempfile>`.
 
-**Multiple commits** — review the whole batch's wording in ONE editor, then commit in order:
+**Multiple commits** — commit in chronological order:
 
-12. Write every drafted message into a single review file in the scratchpad, separated by per-commit markers that name each commit's files (see Multi-Commit Approval below). Have the user open that one file in their editor (via a `!`-prefixed launch) so they can review and edit all the messages together.
-13. When the editor closes, parse the file back into per-commit messages, then for each commit in chronological order: stage its files (`git add <specific-files>`) and commit with `git commit -F <group-msg-file>` — no `-e`, since the editing already happened.
+12. For each commit in order: write its message to its own file in the scratchpad, stage its files (`git add <specific-files>`), and commit with `git commit -F <msg-file>`.
 
 Then, for either path:
 
 14. **Mark each commit's Task as completed** (TaskUpdate with status `completed`), if Tasks were created.
-15. Show the final result. Print the **full committed message** so the user sees exactly what landed even if they missed the editor tab — `git show -s --format=%B HEAD` for a single commit, or `git log --oneline` for a multi-commit batch. State that the commit is local and unpushed, and offer to amend the wording on request. To revise, re-post the launch as a `!` command (e.g. `! git commit --amend`) or take dictated edits and amend with `-F` yourself.
+15. Show the final result. Print the **full committed message** so the user sees exactly what landed — `git show -s --format=%B HEAD` for a single commit, or `git log --oneline` for a multi-commit batch. State that the commit is local and unpushed, and offer to amend the wording on request (take dictated edits and amend with `git commit --amend -F <file>`).
 
 ## Executing the Commit
 
-The user's editor is the final say on wording. Always draft each message **with a conventional type prefix already present** (e.g. `feat:`, `fix(scope):`) so the commit-msg hook passes when the editor closes.
+Always draft each message **with a conventional type prefix already present** (e.g. `feat:`, `fix(scope):`) so the commit-msg hook passes.
 
-**Launch the editor through the session `!` prefix — not a Bash tool call.** Post the launch command for the user to run in their terminal (e.g. `! git commit -F <tempfile> -e`) and wait for them to save, close, and confirm. The Bash tool runs in a detached, non-interactive shell with no controlling terminal, and a `--wait` editor cannot block there: with no terminal session, `code --wait` returns 0 *immediately* without opening, so git commits your unedited draft and the user never sees it (and a terminal editor like `vim` has no TTY at all). The `!` prefix runs in the user's real interactive terminal, where `--wait` actually blocks and terminal editors get a TTY. Only launch it yourself from a Bash tool call if the editor is known to open and block in this environment.
-
-**Before launching the editor, post a one-line heads-up in chat** so the user knows to look for it — e.g. "Opening the commit message in VS Code now — switch to it, edit if you like, then **save and close the tab** to commit." A GUI tab can open behind the terminal unnoticed; without this warning the user may close it (or it auto-closes) without realizing it was the commit editor, silently committing your unreviewed draft.
-
-**After the editor closes, always echo the full committed message back in chat** (see step 15) — this is the reliable checkpoint even when the editor tab was missed. Never treat `git log --oneline` alone as sufficient confirmation.
-
-This `!`-prefix launch covers **every** editor — GUI (`code --wait`, `subl --wait`) and terminal (`vim`, `nano`) alike. Do not special-case GUI editors as "safe to background": `code`/`subl` are often shell **aliases** absent from a non-interactive shell, and even as `PATH` binaries their `--wait` won't block without a real terminal session. If you ever do launch from a Bash tool call, treat exit 127, or an instant return with the committed message byte-for-byte identical to your draft, as "the editor never opened" and fall back to the `!` prefix.
-
-### Single-Commit Approval
-
-Write the draft to a temp file, then have the user run the commit via the `!` prefix. The `-e` opens the configured editor prefilled with the draft plus git's standard status comments; on save, git commits with the edited wording and strips comment lines automatically.
-
-```
-! git commit -F /path/to/scratchpad/commit-msg.txt -e
-```
-
-The temp file holds the subject on line 1, a blank line, then the body (if any):
+Always commit via `-F <file>` — never `-e` (no editor), and never `-m` with embedded newlines. The temp file holds the subject on line 1, a blank line, then the body (if any):
 
 ```
 feat(auth): Add OAuth2 support for GitHub login
@@ -97,40 +80,7 @@ OAuth2 login eliminates the separate account creation step
 that was causing 40% drop-off during onboarding.
 ```
 
-After the user runs the launch, confirm what happened:
-
-- **Success** → committed. Echo the full final message back to the user (step 15). If the committed message is byte-for-byte identical to your draft, the user likely never saw the editor tab — say so explicitly and offer to reopen the editor or amend from dictated edits, rather than assuming silent approval.
-- **Non-zero with "empty commit message"** → the user cleared the message to cancel. Do not retry; report the cancellation and stop.
-- **Non-zero from the commit-msg hook** (e.g. the user removed the conventional prefix) → show the hook output and let the user decide; do not silently re-add and re-run.
-
-### Multi-Commit Approval
-
-Write all drafted messages into ONE review file so the user edits the whole batch's wording in a single editor pass. Separate commits with a marker line that names the commit's files (informational — it is stripped on parse):
-
-```
-# ===== Commit 1 · src/auth.ts =====
-feat(auth): Add OAuth2 support for GitHub login
-
-Why this change was needed, wrapped at 72 chars.
-
-# ===== Commit 2 · src/ui/banner.tsx, src/ui/api.ts =====
-fix(ui): Show retry banner on token refresh failure
-```
-
-Have the user open that file via the `!` prefix. Resolve the editor to a concrete command first — `git config --get core.editor`, else `$VISUAL`, else `$EDITOR` — then post it literally with the path quoted; do **not** paste an unquoted `${EDITOR}` expansion, since zsh (a common default) does not word-split it and would try to run `code --wait` as a single command name → `command not found`:
-
-```
-! code --wait "/path/to/scratchpad/commit-batch.txt"
-```
-
-When the editor closes, parse the file back:
-
-- A line matching `^# =+ Commit \d+ ·` starts a new commit block. Everything from after that marker up to the next marker (or EOF) is that commit's message; trim surrounding blank lines and drop the marker lines themselves.
-- If the **entire file is empty**, the user cancelled the whole batch — commit nothing and stop.
-- If a **single block's message is empty** (cleared but others remain), skip that one commit, tell the user it was skipped, and continue with the rest. Never create an empty commit.
-- Each parsed subject must still start with a conventional prefix; if a block lost it, report it and let the user decide rather than silently re-adding.
-
-Then, for each non-empty block in order, write it to its own file and commit (no `-e`):
+Multi-commit batches stage and commit each unit in order:
 
 ```bash
 git add src/auth.ts
@@ -138,6 +88,8 @@ git commit -F /path/to/scratchpad/commit-msg-1.txt
 git add src/ui/banner.tsx src/ui/api.ts
 git commit -F /path/to/scratchpad/commit-msg-2.txt
 ```
+
+If the commit-msg hook rejects a message, show the hook output and let the user decide how to proceed; do not silently rewrite and re-run.
 
 ## Splitting Commits
 

@@ -2,14 +2,19 @@
 name: pr
 description: Analyzes branch commits, generates a structured PR description, then creates the PR via gh CLI. Use when the user asks to "open a PR", "create a pull request", "submit a PR", or push a branch for review. Do NOT use for creating commits — use /commit for that.
 allowed-tools: [Bash, Read, Glob, Grep, AskUserQuestion, TaskCreate, TaskUpdate]
-argument-hint: "[base-branch]"
+argument-hint: "[base-branch] [--force]"
 ---
 
 Create GitHub pull requests with structured descriptions via `gh` CLI.
 
+## Arguments
+
+- `[base-branch]` — the branch to target (defaults to main/master).
+- `--force` — skip the editor approval step entirely: create the PR immediately using the generated title and description as-is.
+
 ## Hard Rules
 
-- Do not create the PR without the user approving the title and description in their editor — the description is the primary deliverable. Open the draft in the user's configured editor and use exactly what they save. Do not ask for approval in chat with `AskUserQuestion`.
+- Do not create the PR without the user approving the title and description in their editor — the description is the primary deliverable. Open the draft in the user's configured editor and use exactly what they save. Do not ask for approval in chat with `AskUserQuestion`. **Exception:** when `--force` is passed, skip the editor and use the generated draft verbatim.
 - Always push the branch before creating the PR (`gh pr create` requires a remote-tracking branch).
 - Pass the PR body via `--body-file` (not `--body`) so the user's edited Markdown is preserved verbatim.
 - If the base branch is not main or master, use `AskUserQuestion` to ask which branch to target before generating the description.
@@ -39,7 +44,7 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
      - A scope is optional: `feat(auth): Add OAuth2 login`
      - Keep the full title under 70 characters, imperative mood
    - **Summary**: 3-5 bullet points of what changed and _why_ (pull motivation from commit bodies and session context)
-8. Write the draft to a temp file in the scratchpad for the user's final approval — **title on line 1**, a blank line, then the Markdown body. Then have the user open it in their editor via the session `!` prefix, and use exactly what they save. The editor is the approval step — do not prompt for approval in chat.
+8. Write the draft to a temp file in the scratchpad — **title on line 1**, a blank line, then the Markdown body. **If `--force` was passed, skip the editor entirely**: proceed straight to step 9 using the draft as written. Otherwise, have the user open it in their editor via the session `!` prefix for final approval, and use exactly what they save. The editor is the approval step — do not prompt for approval in chat.
 
    First resolve the editor to a concrete command — `git config --get core.editor`, else `$VISUAL`, else `$EDITOR` — then post that literal command for the user to run, with the file path quoted:
 
@@ -51,7 +56,7 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
    - **Emit the resolved command literally; never paste an unquoted `${EDITOR}` expansion.** In zsh (a common default) unquoted parameter expansions are _not_ word-split, so `${EDITOR} file` runs the whole `code --wait` as one command name → `command not found` (exit 127). Substitute the real value first.
    - **Use the `!` prefix, not a Bash tool call.** Editors are often shell **aliases** (`code`, `subl`) absent from a non-interactive tool shell, and a GUI `--wait` editor needs a real terminal session to block — from a detached Bash tool call `code --wait` returns 0 _immediately_ without opening, so you'd proceed with the unedited draft. The `!` prefix runs in the user's real terminal, where the alias resolves, `--wait` blocks, and a terminal editor gets a TTY. Only launch it yourself from a Bash tool call if the editor is a real `PATH` binary that opens here; if you do, treat exit 127 or an instant return with the file unchanged as "never opened" and fall back to `!`.
 
-9. After the user saves and confirms, read `pr-draft.md` back:
+9. Read `pr-draft.md` back (immediately with `--force`; otherwise after the user saves and confirms):
    - First non-empty line → the PR **title**. Everything after the following blank line → the PR **body**.
    - If the file is empty (user cleared it to cancel), report the cancellation and stop.
    - Confirm the title still starts with a conventional type prefix; if the user removed it, re-add the most appropriate one.
