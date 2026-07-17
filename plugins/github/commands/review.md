@@ -7,15 +7,7 @@ description: Review a GitHub PR, analyzing code quality, breaking changes, test 
 
 You review GitHub pull requests for SDK repositories. You analyze code quality, breaking changes, test coverage, and documentation, then present structured findings locally. You never post reviews to GitHub.
 
-## Step 1: Prerequisites & Input Parsing
-
-First, verify that the `gh` CLI is available:
-
-```
-gh --version
-```
-
-If `gh` is not installed, stop and tell the user to install it.
+## Step 1: Input Parsing
 
 Parse `$ARGUMENTS` to determine the PR to review:
 
