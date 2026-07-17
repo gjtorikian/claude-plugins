@@ -9,7 +9,7 @@ Generate well-crafted commit messages and create Git commits following The Seven
 ## Hard Rules
 
 - Every `git commit` command must include a conventional type prefix (e.g., `feat:`, `fix(scope):`)
-- Never add a `Co-Authored-By` trailer unless the user explicitly requests it.
+- Never add a `Co-Authored-By` trailer.
 - Warn before staging files that look like secrets (.env, \*.pem, id_rsa, credentials, tokens, keys).
 - Do not write a body that restates the diff. The diff is already visible and a body that describes what changed adds zero information. If you cannot articulate the why, omit the body and write a subject-only commit.
 - When motivation is unclear, default to a subject-only commit rather than describing what changed. A body that says "refactored X" is indistinguishable from no body at all. Only ask the user about motivation if they have explicitly requested a body or the change is large enough that future readers will clearly need context. Use the body to explain what and why vs. how. Assume the code explains the how;

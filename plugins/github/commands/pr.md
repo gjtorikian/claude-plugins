@@ -19,7 +19,7 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
 - Pass the PR body via `--body-file` (not `--body`) so the user's edited Markdown is preserved verbatim.
 - If the base branch is not main or master, use `AskUserQuestion` to ask which branch to target before generating the description.
 - Do not add a "Test" header section.
-- Never add a `Co-Authored-By` trailer unless the user explicitly requests it.
+- Never add a `Co-Authored-By` trailer to the body of the PR.
 
 ## Process
 
@@ -44,17 +44,19 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
      - A scope is optional: `feat(auth): Add OAuth2 login`
      - Keep the full title under 70 characters, imperative mood
    - **Summary**: 3-5 bullet points of what changed and _why_ (pull motivation from commit bodies and session context)
-8. Write the draft to a temp file in the scratchpad — **title on line 1**, a blank line, then the Markdown body. **If `--force` was passed, skip the editor entirely**: proceed straight to step 9 using the draft as written. Otherwise, have the user open it in their editor via the session `!` prefix for final approval, and use exactly what they save. The editor is the approval step — do not prompt for approval in chat.
+8. Write the draft to a temp file in the scratchpad — **title on line 1**, a blank line, then the Markdown body. **If `--force` was passed, skip the editor entirely**: proceed straight to step 9 using the draft as written. Otherwise open it in the user's editor for final approval, and use exactly what they save. The editor is the approval step — do not prompt for approval in chat.
 
-   First resolve the editor to a concrete command — `git config --get core.editor`, else `$VISUAL`, else `$EDITOR` — then post that literal command for the user to run, with the file path quoted:
+   First resolve the editor to a concrete command — `git config --get core.editor`, else `$VISUAL`, else `$EDITOR` — then pick the launch path by editor type:
+   - **GUI editor (`code`, `subl`, `zed`, …): launch it yourself from a Bash tool call, non-blocking.** Strip any `--wait`/`-w` flag — blocking is useless from a tool call (it would stall until the tool timeout while the user is still editing); the user's chat confirmation replaces it. Run e.g. `code "/path/to/scratchpad/pr-draft.md"`, tell the user the draft is open, and ask them to reply when they've saved (or to clear the file to cancel). If the command isn't found (exit 127 — the editor may be a shell alias), resolve it with `command -v <editor>` and retry with the real binary path; if the launch still fails, fall back to the `!` prefix path below.
+   - **Terminal editor (`vim`, `nano`, `hx`, …): never launch it from a Bash tool call** — it needs a real TTY that only the user's terminal provides. Post the literal resolved command for the user to run with the session `!` prefix, file path quoted:
 
-   ```
-   ! code --wait "/path/to/scratchpad/pr-draft.md"
-   ```
+     ```
+     ! vim "/path/to/scratchpad/pr-draft.md"
+     ```
 
-   Then wait for the user to save, close, and confirm before reading the file back. Two things to get right:
-   - **Emit the resolved command literally; never paste an unquoted `${EDITOR}` expansion.** In zsh (a common default) unquoted parameter expansions are _not_ word-split, so `${EDITOR} file` runs the whole `code --wait` as one command name → `command not found` (exit 127). Substitute the real value first.
-   - **Use the `!` prefix, not a Bash tool call.** Editors are often shell **aliases** (`code`, `subl`) absent from a non-interactive tool shell, and a GUI `--wait` editor needs a real terminal session to block — from a detached Bash tool call `code --wait` returns 0 _immediately_ without opening, so you'd proceed with the unedited draft. The `!` prefix runs in the user's real terminal, where the alias resolves, `--wait` blocks, and a terminal editor gets a TTY. Only launch it yourself from a Bash tool call if the editor is a real `PATH` binary that opens here; if you do, treat exit 127 or an instant return with the file unchanged as "never opened" and fall back to `!`.
+   - **Emit resolved commands literally; never paste an unquoted `${EDITOR}` expansion.** In zsh (a common default) unquoted parameter expansions are _not_ word-split, so `${EDITOR} file` runs the whole `code --wait` string as one command name → `command not found` (exit 127). Substitute the real value first.
+
+   On either path, do not read the file back until the user confirms they've saved.
 
 9. Read `pr-draft.md` back (immediately with `--force`; otherwise after the user saves and confirms):
    - First non-empty line → the PR **title**. Everything after the following blank line → the PR **body**.
@@ -75,4 +77,4 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
 13. Update the Task with the PR URL and mark as completed (`TaskUpdate`).
 14. Return the PR URL to the user.
 
-This `!`-prefix launch covers **every** editor — GUI (`code --wait`, `subl --wait`) and terminal (`vim`, `nano`) alike; the terminal ones need a real TTY, which only the user's terminal provides, so the same launch path works without special-casing GUI vs terminal.
+Why two launch paths: a GUI editor opens fine from a Bash tool call but cannot block there (`--wait` stalls the tool call while the user edits), so launch it non-blocking and let the user's chat reply signal "done" — the user shouldn't have to run a command themselves. Terminal editors are the opposite: they need a real TTY that only the user's terminal provides, so those go through the `!` prefix.
