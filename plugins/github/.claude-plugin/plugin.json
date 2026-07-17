@@ -1,6 +1,6 @@
 {
   "name": "github",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "GitHub workflow commands for pull requests",
   "commands": [
     "./commands/"
