@@ -1,10 +1,15 @@
 ---
 name: commit
-description: "Creates git commits with conventional commit messages (type(scope): subject + why-focused body). Analyzes changes, proposes logical splits, and commits directly without editor approval. Do NOT use for pushing, creating PRs, or amending published commits."
+description: "Creates git commits with conventional commit messages (type(scope): subject + why-focused body). Analyzes changes, proposes logical splits, and commits directly without editor approval. Pushes the resulting commit(s) only when `--push` is passed. Do NOT use for creating PRs or amending published commits."
 allowed-tools: [Bash, Read, Glob, Grep, AskUserQuestion, TaskCreate, TaskUpdate]
+argument-hint: "[--push]"
 ---
 
 Generate well-crafted commit messages and create Git commits following The Seven Rules of Great Commits.
+
+## Arguments
+
+- `--push` — after the commit(s) are created, push them to the remote. Without this flag, the workflow never pushes; commits stay local.
 
 ## Hard Rules
 
@@ -64,7 +69,18 @@ Commit directly with the drafted messages — do not open an editor and do not a
 Then, for either path:
 
 14. **Mark each commit's Task as completed** (TaskUpdate with status `completed`), if Tasks were created.
-15. Show the final result. Print the **full committed message** so the user sees exactly what landed — `git show -s --format=%B HEAD` for a single commit, or `git log --oneline` for a multi-commit batch. State that the commit is local and unpushed, and offer to amend the wording on request (take dictated edits and amend with `git commit --amend -F <file>`).
+15. **If `--push` was passed**, push the new commit(s) — see Pushing below. Otherwise skip this step; never push without the flag.
+16. Show the final result. Print the **full committed message** so the user sees exactly what landed — `git show -s --format=%B HEAD` for a single commit, or `git log --oneline` for a multi-commit batch. State whether the commit(s) were pushed or are still local and unpushed, and offer to amend the wording on request (take dictated edits and amend with `git commit --amend -F <file>`).
+
+## Pushing
+
+Only when `--push` is passed, and only after every planned commit has been created successfully:
+
+1. Run `git push`.
+2. If it fails because the current branch has no upstream, set one and retry: `git push -u origin HEAD`.
+3. If the push is rejected (e.g. the remote has commits you don't), surface the error and let the user decide how to proceed — do **not** force-push or pull automatically.
+
+Never push if any commit failed, and never push work you did not just commit in this run.
 
 ## Executing the Commit
 
