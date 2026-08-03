@@ -9,7 +9,7 @@ The reusable workflows follow the [Agent Skills specification](https://agentskil
 Add the marketplace, then install the plugins you want:
 
 ```text
-/plugin marketplace add gjtorikian/claude-plugins
+/plugin marketplace add gjtorikian/agent-plugins
 /plugin install git@gjtorikian-plugins
 /plugin install github@gjtorikian-plugins
 /plugin install agents@gjtorikian-plugins
@@ -22,7 +22,7 @@ Claude namespaces installed skills by plugin, for example `/git:commit` and `/gi
 Add the repository marketplace and install the plugins you want:
 
 ```sh
-codex plugin marketplace add gjtorikian/claude-plugins
+codex plugin marketplace add gjtorikian/agent-plugins
 codex plugin add git@gjtorikian-plugins
 codex plugin add github@gjtorikian-plugins
 codex plugin add agents@gjtorikian-plugins
@@ -35,7 +35,7 @@ Start a new Codex session after installation, then select a skill with `/skills`
 Install the repository as one Pi package:
 
 ```sh
-pi install git:github.com/gjtorikian/claude-plugins
+pi install git:github.com/gjtorikian/agent-plugins
 ```
 
 Pi loads every shared skill declared in `package.json`. Invoke one with `/skill:commit`, `/skill:review`, or another listed skill name.

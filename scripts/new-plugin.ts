@@ -74,7 +74,7 @@ async function main(): Promise<void> {
         author: {
             name: 'Garen J. Torikian',
         },
-        repository: 'https://github.com/gjtorikian/claude-plugins',
+        repository: 'https://github.com/gjtorikian/agent-plugins',
         license: 'MIT',
         keywords: [name],
         skills: './skills/',
