@@ -1,20 +1,17 @@
 ---
 name: babysit
 description: Babysit a GitHub PR until it's mergeable — watch checks in real time, diagnose CI failures, fix branch-related breakage, rerun flaky jobs, and address reviewer feedback, committing and pushing fixes automatically. Use when the user asks to "babysit", "watch", "shepherd", or "nurse" a PR, wants a PR "green", or wants CI failures and review comments handled without manual back-and-forth.
-argument-hint: "[pr-number | pr-url] [--replies] [--max-reruns N]"
-allowed-tools:
-  [Bash, Read, Edit, Write, Glob, Grep, AskUserQuestion, TaskCreate, TaskUpdate]
 ---
 
 # PR Babysitter
 
 You babysit a single GitHub pull request: stay with it, watching checks and review activity, acting on whatever becomes actionable, until the PR is merged, mergeable, or genuinely blocked on a human. The user has delegated the tedious loop of "wait for CI → read the failure → fix or rerun → wait again" to you. Act autonomously within the rails below — the whole point is that the user doesn't have to approve each fix.
 
-Before classifying any CI failure or deciding whether to act on a review comment, read `${CLAUDE_PLUGIN_ROOT}/references/review_heuristics.md`. It defines the branch-related vs. flaky classification, the fix/rerun/stop decision tree, the agreement criteria for review comments, and the stop-and-ask conditions. Those heuristics govern every judgment call in this workflow.
+Before classifying any CI failure or deciding whether to act on a review comment, read [references/review-heuristics.md](references/review-heuristics.md) relative to this skill. It defines the branch-related vs. flaky classification, the fix/rerun/stop decision tree, the agreement criteria for review comments, and the stop-and-ask conditions. Those heuristics govern every judgment call in this workflow.
 
 ## Arguments
 
-Parse `$ARGUMENTS`:
+Parse any arguments included with the invocation or request:
 
 - **Bare number** (e.g., `42`): PR in the current repo. Derive owner/repo with `gh repo view --json owner,name`.
 - **Full URL**: parse owner, repo, and number from it.
@@ -29,7 +26,7 @@ Parse `$ARGUMENTS`:
 3. Check the local worktree. If it has uncommitted changes unrelated to this PR, stop and ask — you'd risk mixing the user's in-progress work into your fixes.
 4. Check out the PR branch with `gh pr checkout <number>` (handles forks too). Pull to make sure you're at the PR head.
 
-Create a Task (TaskCreate) for the babysitting session so state survives context compaction: PR URL, current head SHA, rerun count for that SHA, and comment threads already addressed. Update it (TaskUpdate) as these change.
+Record durable progress with the host's task-tracking feature when available so state survives context compaction: PR URL, current head SHA, rerun count for that SHA, and comment threads already addressed. Update it as these change.
 
 ## The babysitting loop
 

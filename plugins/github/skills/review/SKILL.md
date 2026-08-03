@@ -1,6 +1,6 @@
 ---
 name: review
-description: Review a GitHub PR, analyzing code quality, breaking changes, test coverage, and documentation. Presents structured findings locally.
+description: Reviews a GitHub pull request for code quality, breaking changes, test coverage, and documentation, with an emphasis on SDK repositories. Use when the user asks to review, audit, or inspect a PR. Presents structured findings locally and never posts them to GitHub.
 ---
 
 # SDK PR Review
@@ -9,7 +9,7 @@ You review GitHub pull requests for SDK repositories. You analyze code quality, 
 
 ## Step 1: Input Parsing
 
-Parse `$ARGUMENTS` to determine the PR to review:
+Parse any arguments included with the invocation or request to determine the PR to review:
 
 - **Bare number** (e.g., `42`): Use the current repo. Derive owner/repo with `gh repo view --json owner,name`.
 - **Full URL** (e.g., `https://github.com/owner/repo/pull/42`): Parse the owner, repo, and PR number from the URL.

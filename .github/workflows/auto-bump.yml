@@ -1,9 +1,7 @@
 name: Auto-bump plugin versions
 
-# When a plugin's content changes on main, bump that plugin's patch version so
-# the version string (the cache key Claude Code installs by) changes and users
-# actually receive the update. Without a bump, edits silently go stale in the
-# installed plugin cache.
+# When a plugin's content changes on main, bump both host manifests so Claude
+# Code and Codex invalidate their installed plugin caches together.
 
 on:
   push:
@@ -64,6 +62,12 @@ jobs:
           for plugin_json in plugins/*/.claude-plugin/plugin.json; do
             [ -f "$plugin_json" ] || continue
             plugin_dir="$(dirname "$(dirname "$plugin_json")")"   # plugins/<name>
+            codex_json="${plugin_dir}/.codex-plugin/plugin.json"
+
+            if [ ! -f "$codex_json" ]; then
+              echo "::error file=$plugin_json::Missing cross-host manifest $codex_json"
+              exit 1
+            fi
 
             # All changes inside this plugin's directory.
             changes_in_plugin="$(printf '%s\n' "$changed_files" | grep -E "^${plugin_dir}/" || true)"
@@ -71,15 +75,20 @@ jobs:
               continue   # plugin untouched
             fi
 
-            # If the ONLY change is the manifest itself, the author bumped (or
-            # edited) the version by hand — respect that, don't touch it.
-            non_manifest="$(printf '%s\n' "$changes_in_plugin" | grep -v "^${plugin_dir}/.claude-plugin/plugin.json$" || true)"
+            # If the ONLY changes are manifests, the author bumped or edited
+            # metadata by hand — respect that and do not double-bump.
+            non_manifest="$(printf '%s\n' "$changes_in_plugin" | grep -v -E "^${plugin_dir}/\.(claude|codex)-plugin/plugin.json$" || true)"
             if [ -z "$non_manifest" ]; then
-              echo "$plugin_dir: only plugin.json changed — leaving version as-is."
+              echo "$plugin_dir: only host manifests changed — leaving versions as-is."
               continue
             fi
 
             current="$(jq -r '.version' "$plugin_json")"
+            codex_current="$(jq -r '.version' "$codex_json")"
+            if [ "$current" != "$codex_current" ]; then
+              echo "::error file=$codex_json::Host manifest versions disagree ($current vs $codex_current)."
+              exit 1
+            fi
             base_version="$(git show "${before}:${plugin_json}" 2>/dev/null | jq -r '.version' 2>/dev/null || echo "")"
 
             # Brand-new plugin: keep its declared initial version.
@@ -104,6 +113,9 @@ jobs:
             tmp="$(mktemp)"
             jq --arg v "$new_version" '.version = $v' "$plugin_json" > "$tmp"
             mv "$tmp" "$plugin_json"
+            tmp="$(mktemp)"
+            jq --arg v "$new_version" '.version = $v' "$codex_json" > "$tmp"
+            mv "$tmp" "$codex_json"
             echo "$plugin_dir: $current -> $new_version"
             echo "$(basename "$plugin_dir"): $current -> $new_version" >> "$summary_file"
             bumped=1
@@ -123,7 +135,8 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          git add plugins/*/.claude-plugin/plugin.json .claude-plugin/marketplace.json
+          git add plugins/*/.claude-plugin/plugin.json plugins/*/.codex-plugin/plugin.json \
+            .claude-plugin/marketplace.json .agents/plugins/marketplace.json
 
           if git diff --cached --quiet; then
             echo "Nothing staged after bump; skipping commit."

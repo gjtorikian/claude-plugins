@@ -1,0 +1,4 @@
+interface:
+  display_name: "Session Handoff"
+  short_description: "Create and resume portable session handoffs"
+  default_prompt: "Use $handoff to create a handoff for this session."

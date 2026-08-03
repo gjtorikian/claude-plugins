@@ -1,0 +1,4 @@
+interface:
+  display_name: "Review Pull Request"
+  short_description: "Review a pull request and report findings"
+  default_prompt: "Use $review to review this pull request."

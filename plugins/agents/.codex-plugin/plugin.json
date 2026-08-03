@@ -1,0 +1,24 @@
+{
+  "name": "agents",
+  "version": "0.1.0",
+  "description": "Agent workflow skills for session handoffs.",
+  "author": {
+    "name": "Garen J. Torikian"
+  },
+  "repository": "https://github.com/gjtorikian/claude-plugins",
+  "license": "MIT",
+  "keywords": ["agents", "handoff", "session"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Agent Handoffs",
+    "shortDescription": "Create and resume portable session handoffs",
+    "longDescription": "Create durable session handoffs and safely resume work in a fresh coding-agent session.",
+    "developerName": "Garen J. Torikian",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Create a handoff for this session.",
+      "Resume the latest session handoff."
+    ]
+  }
+}

@@ -1,26 +1,9 @@
 # agents
 
-Agent workflow commands for session handoffs.
+Portable workflow skills for coding-agent session handoffs.
 
-## Available Commands
+| Skill | Claude Code | Codex | Pi |
+| --- | --- | --- | --- |
+| `handoff` | `/agents:handoff` | `$handoff` | `/skill:handoff` |
 
-### `/handoff`
-
-Create or resume session handoff documents for seamless context transfer between AI sessions.
-
-**Usage:**
-- **Create**: `/handoff create` — Save current session state (branch, work completed, next steps, context) for a future session
-- **Resume**: `/handoff resume` — Load a previous handoff document and prepare to continue work
-
-Handoff documents are stored in `.claude/handoffs/` and include:
-- Current project state and active branch
-- Work completed and files modified
-- Pending work and immediate next steps
-- Important context and gotchas for the resuming agent
-- Environment state and assumptions
-
-**When to use:**
-- Before ending a session with incomplete work
-- When picking up work after a break
-- When multiple people/sessions work on the same branch
-- After significant progress to create a checkpoint
+New handoffs are stored in `.agents/handoffs/`. The skill can still resume existing handoffs from the legacy `.claude/handoffs/` location.

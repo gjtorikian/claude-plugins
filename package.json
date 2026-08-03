@@ -1,9 +1,22 @@
 {
-  "name": "gjtorikian-claude-plugins",
+  "name": "gjtorikian-agent-plugins",
+  "description": "Portable Agent Skills for (at least) Codex, Claude Code, and Pi",
   "private": true,
   "type": "module",
+  "keywords": [
+    "pi-package",
+    "agent-skills",
+    "codex",
+    "claude-code"
+  ],
+  "pi": {
+    "skills": [
+      "./plugins/*/skills"
+    ]
+  },
   "scripts": {
     "sync": "npx tsx scripts/sync.ts",
+    "check": "npx tsx scripts/sync.ts --check",
     "new": "npx tsx scripts/new-plugin.ts"
   }
 }

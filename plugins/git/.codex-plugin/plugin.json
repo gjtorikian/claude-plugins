@@ -1,0 +1,24 @@
+{
+  "name": "git",
+  "version": "0.1.6",
+  "description": "Git workflow skills for conventional commits.",
+  "author": {
+    "name": "Garen J. Torikian"
+  },
+  "repository": "https://github.com/gjtorikian/claude-plugins",
+  "license": "MIT",
+  "keywords": ["git", "commit", "conventional-commits"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Git Workflows",
+    "shortDescription": "Create clean, conventional Git commits",
+    "longDescription": "Analyze changes, split them into logical units when needed, and create clear conventional commits.",
+    "developerName": "Garen J. Torikian",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Commit my current changes.",
+      "Commit my changes and push them."
+    ]
+  }
+}

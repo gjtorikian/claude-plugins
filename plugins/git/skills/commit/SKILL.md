@@ -1,11 +1,9 @@
 ---
 name: commit
 description: "Creates git commits with conventional commit messages (type(scope): subject + why-focused body). Analyzes changes, proposes logical splits, and commits directly without editor approval. Pushes the resulting commit(s) only when `--push` is passed. Do NOT use for creating PRs or amending published commits."
-allowed-tools: [Bash, Read, Glob, Grep, AskUserQuestion, TaskCreate, TaskUpdate]
-argument-hint: "[--push]"
 ---
 
-Generate well-crafted commit messages and create Git commits following The Seven Rules of Great Commits.
+Generate well-crafted commit messages and create Git commits following the commit rules below.
 
 ## Arguments
 
@@ -21,7 +19,7 @@ Generate well-crafted commit messages and create Git commits following The Seven
   the message must explain the context and reasoning.
 - Match the existing commit style in the repository when possible.
 - When describing commands (`npm run`, `curl -X`, etc) wrap them in backticks so they appear as Markdown code
-- Commit directly with your drafted message — do **not** open an editor for approval, and do not ask for message approval in chat with `AskUserQuestion`. The user trusts the generated wording; they can ask to amend afterwards. The only prompt in this workflow is the split confirmation in Phase 2.
+- Commit directly with your drafted message — do **not** open an editor or ask for message approval. The user trusts the generated wording and can ask to amend afterwards. The only prompt in this workflow is the split confirmation in Phase 2.
 
 ## Process
 
@@ -34,12 +32,12 @@ Generate well-crafted commit messages and create Git commits following The Seven
 ### Phase 2: Plan Commit Strategy
 
 4. **Evaluate if changes should be split** into multiple logical commits (see Splitting Commits below). Default to a single commit unless the diff clearly spans unrelated concerns (e.g. a bug fix in one module plus a feature in another). Tightly related changes — even across several files — should stay together.
-5. Only if the diff clearly contains multiple unrelated changes, use `AskUserQuestion` to confirm the proposed split:
+5. Only if the diff clearly contains multiple unrelated changes, ask the user to confirm the proposed split:
    - Option per proposed grouping (e.g. "Commit 1: auth refactor, Commit 2: payment fix")
    - Option to keep as single commit
    - User can select "Other" to describe a different split
      Otherwise, proceed as a single commit without prompting.
-6. **If there are 2 or more planned commits**, create a Task for each one using TaskCreate. This is critical for multi-commit workflows — they often happen at the end of a session when context is low and Tasks survive compaction. Include in each task the files to stage, draft subject line, and motivation (if known). For a single commit, skip Task creation.
+6. **If there are 2 or more planned commits**, record each one with the host's task-tracking feature when available. Include the files to stage, draft subject line, and motivation (if known). For a single commit, skip task tracking.
 7. For each planned commit, draft a subject line and body following the rules in Phase 3
 
 ### Phase 3: Draft Messages and Determine Motivation
@@ -51,7 +49,7 @@ Generate well-crafted commit messages and create Git commits following The Seven
    - **The broader repository context** — why this approach was chosen over alternatives
 9. **If the motivation is still unclear**, default to a subject-only commit. Do not guess at a body, and do not prompt the user unless the change is large or non-obvious enough that a future reader will clearly need the context. A clear subject is better than an interruption.
 10. Draft each commit message with the subject and, only when motivation is known, a body that explains the _why_
-11. **Update each commit's Task** with the final draft message (TaskUpdate), if Tasks were created
+11. Update each tracked task with the final draft message, if task tracking is available.
 
 ### Phase 4: Execute
 
@@ -60,15 +58,15 @@ Commit directly with the drafted messages — do not open an editor and do not a
 **Single commit:**
 
 12. Stage the relevant files (`git add <specific-files>` or `git add -p`).
-13. Write the drafted message to a temp file in the scratchpad and commit with `git commit -F <tempfile>`.
+13. Write the drafted message to a temporary file and commit with `git commit -F <tempfile>`.
 
 **Multiple commits** — commit in chronological order:
 
-12. For each commit in order: write its message to its own file in the scratchpad, stage its files (`git add <specific-files>`), and commit with `git commit -F <msg-file>`.
+12. For each commit in order: write its message to its own temporary file, stage its files (`git add <specific-files>`), and commit with `git commit -F <msg-file>`.
 
 Then, for either path:
 
-14. **Mark each commit's Task as completed** (TaskUpdate with status `completed`), if Tasks were created.
+14. Mark each tracked commit task complete, if task tracking is available.
 15. **If `--push` was passed**, push the new commit(s) — see Pushing below. Otherwise skip this step; never push without the flag.
 16. Show the final result. Print the **full committed message** so the user sees exactly what landed — `git show -s --format=%B HEAD` for a single commit, or `git log --oneline` for a multi-commit batch. State whether the commit(s) were pushed or are still local and unpushed, and offer to amend the wording on request (take dictated edits and amend with `git commit --amend -F <file>`).
 
@@ -100,9 +98,9 @@ Multi-commit batches stage and commit each unit in order:
 
 ```bash
 git add src/auth.ts
-git commit -F /path/to/scratchpad/commit-msg-1.txt
+git commit -F /path/to/temp/commit-msg-1.txt
 git add src/ui/banner.tsx src/ui/api.ts
-git commit -F /path/to/scratchpad/commit-msg-2.txt
+git commit -F /path/to/temp/commit-msg-2.txt
 ```
 
 If the commit-msg hook rejects a message, show the hook output and let the user decide how to proceed; do not silently rewrite and re-run.

@@ -1,18 +1,15 @@
 ---
 name: handoff
-description: "Creates or resumes session handoff documents for seamless context transfer between AI sessions. Use when: user says 'handoff', 'save state', 'create handoff', 'context save', 'I need to pause', 'wrap up session', 'hand off', or 'resume', 'load handoff', 'continue where we left off', 'pick up from'. Also proactively suggest after 5+ file edits or major architectural decisions."
-allowed-tools:
-  [Bash, Read, Write, Glob, Grep, AskUserQuestion, TaskCreate, TaskUpdate]
-argument-hint: "[create|resume]"
+description: Creates or resumes session handoff documents for seamless context transfer between AI coding sessions. Use when the user asks to hand off, save state, pause, wrap up, resume, load a handoff, or continue previous work. Also suggest it after extensive edits or major architectural decisions.
 ---
 
-Create or resume session handoff documents so a fresh Claude session can continue work with zero ambiguity. Handoffs are stored in `.claude/handoffs/` in the project root.
+Create or resume session handoff documents so a fresh coding-agent session can continue work with zero ambiguity. Store new handoffs in `.agents/handoffs/` at the project root.
 
 ## Hard Rules
 
 - Never include secrets, API keys, passwords, tokens, or credentials in handoff documents. If you encounter them in context, redact them.
-- Always use `AskUserQuestion` to confirm the handoff document before writing it — this is the user's record of their work.
-- Handoff documents are Markdown files stored at `.claude/handoffs/YYYY-MM-DD-HHMMSS-<slug>.md`. Create the directory if it does not exist.
+- Always show the complete draft and obtain explicit user confirmation before writing it. This is the user's record of their work.
+- Store handoff documents as `.agents/handoffs/YYYY-MM-DD-HHMMSS-<slug>.md`. Create the directory if it does not exist.
 - When resuming, verify that referenced files and branches still exist before acting on the handoff. A handoff is a snapshot in time — trust the current codebase over stale references.
 - Do not auto-continue work after resuming. Present the next steps and wait for user direction.
 
@@ -37,7 +34,7 @@ Determine the mode based on the user's request or argument:
 
 #### Phase 2: Draft Handoff Document
 
-6. Generate a slug from the primary task (e.g., `auth-refactor`, `fix-payment-bug`). Use `AskUserQuestion` if the task focus is unclear.
+6. Generate a slug from the primary task (e.g., `auth-refactor`, `fix-payment-bug`). Ask the user if the task focus is unclear.
 7. Draft the handoff document using this structure:
 
 ```markdown
@@ -114,12 +111,9 @@ Determine the mode based on the user's request or argument:
 
 #### Phase 3: Review and Write
 
-8. Use `AskUserQuestion` to present the draft handoff for approval. Use the `preview` field to show the full document. Options:
-   - "Save as shown" — proceed
-   - "Edit" — user describes changes via Other
-   - "Cancel" — abort
-9. Create the `.claude/handoffs/` directory if it does not exist (`mkdir -p`)
-10. Write the approved document to `.claude/handoffs/YYYY-MM-DD-HHMMSS-<slug>.md`
+8. Present the full draft for approval using the host's user-input mechanism when available, or ask in chat. Offer to save it as shown, edit it, or cancel.
+9. Create `.agents/handoffs/` if it does not exist.
+10. Write the approved document to `.agents/handoffs/YYYY-MM-DD-HHMMSS-<slug>.md`.
 11. If there are uncommitted changes and the user might want to preserve them, mention that they may want to commit or stash before ending the session
 12. Report the file path and a one-line summary of next steps
 
@@ -129,9 +123,9 @@ Determine the mode based on the user's request or argument:
 
 #### Phase 1: Find Handoff
 
-1. List available handoffs with `ls -lt .claude/handoffs/*.md 2>/dev/null` (sorted by most recent)
+1. List `.agents/handoffs/*.md` sorted by most recent. If that directory has no handoffs, also check the legacy `.claude/handoffs/*.md` location.
 2. If no handoffs exist, inform the user and stop
-3. If the user specified a file, use that. Otherwise, show the most recent 5 handoffs using `AskUserQuestion` and let the user pick
+3. If the user specified a file, use that. Otherwise, show the five most recent handoffs and let the user pick.
 
 #### Phase 2: Validate Freshness
 

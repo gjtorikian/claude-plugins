@@ -1,7 +1,7 @@
 {
   "name": "gjtorikian-plugins",
   "version": "0.1.0",
-  "description": "A collection of Claude Code plugins for gjtorikian",
+  "description": "Portable agent workflow plugins for Claude Code, Codex, and Pi",
   "owner": {
     "name": "Garen J. Torikian",
     "github": "gjtorikian"
@@ -10,19 +10,19 @@
     {
       "name": "agents",
       "source": "./plugins/agents",
-      "description": "Agent workflow commands for session handoffs.",
+      "description": "Agent workflow skills for session handoffs.",
       "version": "0.1.0"
     },
     {
       "name": "git",
       "source": "./plugins/git",
-      "description": "Git workflow commands for commits",
+      "description": "Git workflow skills for conventional commits.",
       "version": "0.1.6"
     },
     {
       "name": "github",
       "source": "./plugins/github",
-      "description": "GitHub workflow commands for pull requests",
+      "description": "GitHub workflow skills for pull requests, reviews, and CI.",
       "version": "0.1.7"
     }
   ]

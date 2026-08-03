@@ -1,0 +1,4 @@
+interface:
+  display_name: "Babysit Pull Request"
+  short_description: "Shepherd CI and review feedback to green"
+  default_prompt: "Use $babysit to shepherd this pull request until it is ready."

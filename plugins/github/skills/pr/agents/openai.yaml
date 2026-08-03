@@ -1,0 +1,4 @@
+interface:
+  display_name: "Create Pull Request"
+  short_description: "Draft and create a clear pull request"
+  default_prompt: "Use $pr to open a pull request for this branch."
