@@ -1,13 +1,18 @@
 {
   "name": "github",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "GitHub workflow skills for pull requests, reviews, and CI.",
   "author": {
     "name": "Garen J. Torikian"
   },
   "repository": "https://github.com/gjtorikian/claude-plugins",
   "license": "MIT",
-  "keywords": ["github", "pull-requests", "code-review", "ci"],
+  "keywords": [
+    "github",
+    "pull-requests",
+    "code-review",
+    "ci"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "GitHub Workflows",
@@ -15,7 +20,10 @@
     "longDescription": "Create pull requests, review changes, and shepherd CI and reviewer feedback through completion.",
     "developerName": "Garen J. Torikian",
     "category": "Productivity",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
     "defaultPrompt": [
       "Open a pull request for this branch.",
       "Review a GitHub pull request.",

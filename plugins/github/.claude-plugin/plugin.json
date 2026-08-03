@@ -1,12 +1,17 @@
 {
   "name": "github",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "GitHub workflow skills for pull requests, reviews, and CI.",
   "author": {
     "name": "Garen J. Torikian"
   },
   "repository": "https://github.com/gjtorikian/claude-plugins",
   "license": "MIT",
-  "keywords": ["github", "pull-requests", "code-review", "ci"],
+  "keywords": [
+    "github",
+    "pull-requests",
+    "code-review",
+    "ci"
+  ],
   "skills": "./skills/"
 }

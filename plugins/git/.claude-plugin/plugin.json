@@ -1,12 +1,16 @@
 {
   "name": "git",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Git workflow skills for conventional commits.",
   "author": {
     "name": "Garen J. Torikian"
   },
   "repository": "https://github.com/gjtorikian/claude-plugins",
   "license": "MIT",
-  "keywords": ["git", "commit", "conventional-commits"],
+  "keywords": [
+    "git",
+    "commit",
+    "conventional-commits"
+  ],
   "skills": "./skills/"
 }
