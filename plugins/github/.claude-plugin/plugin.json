@@ -1,6 +1,6 @@
 {
   "name": "github",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "GitHub workflow skills for pull requests, reviews, and CI.",
   "author": {
     "name": "Garen J. Torikian"
