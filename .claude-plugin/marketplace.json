@@ -23,7 +23,7 @@
       "name": "github",
       "source": "./plugins/github",
       "description": "GitHub workflow skills for pull requests, reviews, and CI.",
-      "version": "0.1.8"
+      "version": "0.1.9"
     }
   ]
 }
