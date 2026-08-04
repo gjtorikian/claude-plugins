@@ -62,8 +62,8 @@ Create GitHub pull requests with structured descriptions via `gh` CLI.
    - First non-empty line → the PR **title**. Everything after the following blank line → the PR **body**.
    - If the file is empty (user cleared it to cancel), report the cancellation and stop.
    - Confirm the title still starts with a conventional type prefix; if the user removed it, re-add the most appropriate one.
+   - Expand any image upload expressions (e.g. `$(gh image "~/path/to/file.png")`) by running the command and substituting the returned Markdown image line in place of the expression. Do this before writing the final body file.
    - Write the body portion to its own file (e.g. `pr-body.md`) for `--body-file`.
-   - Before creating the PR, expand any image upload expressions in the saved draft — e.g. `$(gh image "~/path/to/file.png")` — by running the command and replacing the expression with the returned Markdown image line. `--body-file` passes content verbatim, so unexpanded `$(...)` would land in the PR as literal text. Apply this after the user saves the draft and before `gh pr create`, then proceed with the expanded body.
 
 ### Phase 4: Push and Create
 
