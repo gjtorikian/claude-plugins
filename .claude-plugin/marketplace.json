@@ -23,7 +23,7 @@
       "name": "eli5",
       "source": "./plugins/eli5",
       "description": "Eli5 agent workflow skill.",
-      "version": "0.1.1"
+      "version": "0.1.2"
     },
     {
       "name": "git",
