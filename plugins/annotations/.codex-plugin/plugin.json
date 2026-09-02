@@ -1,0 +1,31 @@
+{
+  "name": "annotations",
+  "version": "0.1.0",
+  "description": "Render agent output as a self-contained black-and-white HTML page with an in-page annotation layer that hands comments back as a markdown digest.",
+  "author": {
+    "name": "Garen J. Torikian"
+  },
+  "repository": "https://github.com/gjtorikian/agent-plugins",
+  "license": "MIT",
+  "keywords": [
+    "annotations",
+    "artifacts",
+    "html",
+    "eli5"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Annotations",
+    "shortDescription": "Render agent output as a self-contained black-and-white HTML page with an in-page annotation layer that hands comments back as a markdown digest.",
+    "longDescription": "Pages are written to .agents/artifacts/ in the current project and opened in your browser, with no network access and no build step. Mark a passage, leave a note, then press Copy for agent and paste the markdown digest back into the session to have the page revised.",
+    "developerName": "Garen J. Torikian",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Render this as a page."
+    ]
+  }
+}

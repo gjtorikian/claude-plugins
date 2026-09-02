@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="annotations-slug" content="">
+<title></title>
+<style>
+/* ---------------------------------------------------------------
+   1. tokens
+   Black, white, and two grays. Nothing else.
+   --------------------------------------------------------------- */
+:root {
+  color-scheme: light dark;
+  --paper: #ffffff;
+  --ink: #000000;
+  --muted: #5c5c5c;      /* eyebrow meta, captions */
+  --tint: #f2f2f2;       /* code and table-header backgrounds */
+  --font-sans: "Helvetica Neue", Helvetica, Inter, Arial, system-ui, sans-serif;
+  --font-mono: "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --measure: 42rem;
+  --rule: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root { --paper: #000000; --ink: #ffffff; --muted: #a3a3a3; --tint: #141414; }
+}
+
+/* ---------------------------------------------------------------
+   2. base + type
+   Swiss grotesk at poster scale on a single measure.
+   --------------------------------------------------------------- */
+html { font-size: 17px; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 3rem 1.5rem 6rem;
+}
+
+h1 {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  line-height: .98;
+  letter-spacing: -.045em;
+  font-weight: 800;
+  margin: 0 0 1rem;
+  overflow-wrap: anywhere;
+}
+
+h2 {
+  font-size: 1.5rem;
+  letter-spacing: -.02em;
+  font-weight: 800;
+  border-top: var(--rule) solid var(--ink);
+  padding-top: .6rem;
+  margin: 2.5rem 0 .8rem;
+  overflow-wrap: anywhere;
+}
+
+h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin: 1.8rem 0 .5rem;
+  overflow-wrap: anywhere;
+}
+
+p { margin: .8rem 0; }
+
+a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+strong { font-weight: 800; }
+
+::selection { background: var(--ink); color: var(--paper); }
+
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+/* ---------------------------------------------------------------
+   3. content elements
+   Every class the content block may use. See references/elements.md.
+   --------------------------------------------------------------- */
+.eyebrow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: .7rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-top: var(--rule) solid var(--ink);
+  padding-top: .5rem;
+  margin: 0 0 1.4rem;
+}
+
+.eyebrow span + span { color: var(--muted); }
+
+.lede {
+  font-size: 1.15rem;
+  font-weight: 500;
+  margin: 0 0 1.4rem;
+}
+
+/* The one permitted black callout. At most one per page. */
+.block {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 1rem 1.1rem;
+  margin: 1.4rem 0;
+}
+
+.block b:first-child {
+  display: block;
+  font-size: .68rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  opacity: .75;
+}
+
+.block p { margin: .4rem 0 0; }
+
+/* Numbered sequences only. */
+.steps {
+  list-style: none;
+  padding: 0;
+  margin: 1.4rem 0;
+}
+
+.steps li {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr;
+  border-top: 1px solid var(--ink);
+  padding: .5rem 0;
+}
+
+.steps li:last-child { border-bottom: 1px solid var(--ink); }
+
+.steps li span:first-child { font-weight: 800; }
+
+.so-what {
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 1.6rem 0 0;
+  border-top: var(--rule) solid var(--ink);
+  padding-top: .8rem;
+}
+
+ul, ol { padding-left: 1.3rem; }
+
+li { margin: .3rem 0; }
+
+blockquote {
+  margin: 1.2rem 0;
+  padding: .2rem 1rem;
+  border-left: var(--rule) solid var(--ink);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: .85em;
+  background: var(--tint);
+  padding: .1em .35em;
+}
+
+pre {
+  background: var(--tint);
+  border: 1px solid var(--ink);
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+pre code { background: none; padding: 0; }
+
+/* Wide content scrolls inside its own box, never the page. */
+.scroll { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.2rem 0;
+  font-size: .92rem;
+}
+
+th {
+  text-align: left;
+  font-size: .7rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border-bottom: var(--rule) solid var(--ink);
+  padding: .5rem .6rem;
+  background: var(--tint);
+}
+
+td {
+  border-bottom: 1px solid var(--ink);
+  padding: .55rem .6rem;
+  vertical-align: top;
+}
+
+img, svg, video { max-width: 100%; }
+
+pre.mermaid { background: none; border: none; text-align: center; }
+
+/* ---------------------------------------------------------------
+   4. comment marks
+   Appearance only. Behavior arrives in phase 2.
+   --------------------------------------------------------------- */
+mark.ann-mark {
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 2px;
+  text-decoration-skip-ink: none;
+  cursor: pointer;
+}
+
+sup.ann-n {
+  display: inline-block;
+  font-size: .68rem;
+  font-weight: 800;
+  line-height: 1.15rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  text-align: center;
+  border: 2.5px solid var(--ink);
+  border-radius: 50%;
+  vertical-align: .15em;
+  margin-left: .25rem;
+  background: var(--paper);
+  color: var(--ink);
+  user-select: none;
+}
+
+/* ---------------------------------------------------------------
+   5. (phase 2) layer UI
+   Reserved for the annotation layer's chrome. Intentionally empty.
+   --------------------------------------------------------------- */
+</style>
+</head>
+<body>
+<main class="page">
+<article class="content">
+<!-- ANNOTATIONS:CONTENT:START -->
+<!-- ANNOTATIONS:CONTENT:END -->
+</article>
+</main>
+</body>
+</html>
