@@ -56,7 +56,7 @@ Write confidently and clearly. Respect their intelligence while bridging knowled
 
 ## Important Reminders
 
-- Never talk down to anyone. A 5-year-old explanation should feel delightful, not dumbing-down. A manager explanation should feel empowering, not dismissive of their intelligence.
+- Never talk down to anyone. An explanation should feel delightful, not dumbing-down. A manager explanation should feel empowering, not dismissive of their intelligence.
 - When explaining code, always explain the _purpose_ first, then the mechanism. Nobody cares about syntax until they know why it exists.
 - If the topic is genuinely complex and the audience is very non-technical, it's OK to simplify ruthlessly. Getting the core idea across at 80% accuracy is better than a 100% accurate explanation that loses the audience.
 - Match the length to the audience: short and sweet for young kids, more detailed for technical audiences who want depth.
