@@ -14,6 +14,12 @@
       "version": "0.1.1"
     },
     {
+      "name": "eli5",
+      "source": "./plugins/eli5",
+      "description": "Eli5 agent workflow skill.",
+      "version": "0.1.0"
+    },
+    {
       "name": "git",
       "source": "./plugins/git",
       "description": "Git workflow skills for conventional commits.",

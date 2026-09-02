@@ -1,0 +1,4 @@
+interface:
+  display_name: "Eli5"
+  short_description: "Eli5 agent workflow skill."
+  default_prompt: "Use $eli5 for the Eli5 workflow."

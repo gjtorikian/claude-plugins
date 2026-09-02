@@ -1,0 +1,14 @@
+{
+  "name": "eli5",
+  "version": "0.1.0",
+  "description": "Eli5 agent workflow skill.",
+  "author": {
+    "name": "Garen J. Torikian"
+  },
+  "repository": "https://github.com/gjtorikian/agent-plugins",
+  "license": "MIT",
+  "keywords": [
+    "eli5"
+  ],
+  "skills": "./skills/"
+}
