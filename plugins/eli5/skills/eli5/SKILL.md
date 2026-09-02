@@ -54,6 +54,10 @@ Write confidently and clearly. Respect their intelligence while bridging knowled
 **User says**: "ELI5 what a database index is"
 **Response style**: "Imagine you have a huuuge book with thousands of pages. Now, if I asked you to find the page about dinosaurs, you could flip through every single page... or you could look at the table of contents at the front! A database index is like that table of contents. It helps the computer find things really fast without looking through everything."
 
+## Rendering as a page
+
+Only when the user asks for the explanation as a page, an artifact, or "in the browser": if the annotations skill is available, hand the finished explanation to it with the title, the audience line as the eyebrow (for example "Explained for an engineering manager"), and the explanation as the content, and let it render and open the page; reply in the terminal with one line and the path. If the annotations skill is not available, say that it ships as `annotations@gjtorikian-plugins` in this marketplace and give the explanation in the terminal instead. Never render a page the user did not ask for.
+
 ## Important Reminders
 
 - Never talk down to anyone. An explanation should feel delightful, not dumbing-down. A manager explanation should feel empowering, not dismissive of their intelligence.

@@ -1,0 +1,11 @@
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+(function () {
+  var css = getComputedStyle(document.documentElement);
+  var t = function (n) { return css.getPropertyValue(n).trim(); };
+  mermaid.initialize({ startOnLoad: true, theme: 'base', themeVariables: {
+    background: t('--paper'), primaryColor: t('--paper'), primaryTextColor: t('--ink'), primaryBorderColor: t('--ink'),
+    lineColor: t('--ink'), textColor: t('--ink'), secondaryColor: t('--tint'), tertiaryColor: t('--paper'),
+    fontFamily: t('--font-sans') } });
+})();
+</script>

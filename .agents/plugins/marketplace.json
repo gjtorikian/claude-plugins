@@ -17,6 +17,18 @@
       "category": "Productivity"
     },
     {
+      "name": "annotations",
+      "source": {
+        "source": "local",
+        "path": "./plugins/annotations"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    },
+    {
       "name": "eli5",
       "source": {
         "source": "local",

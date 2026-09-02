@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="annotations-slug" content="">
+<title></title>
+<style>
+/* ---------------------------------------------------------------
+   1. tokens
+   Black, white, and two grays. Nothing else.
+   --------------------------------------------------------------- */
+:root {
+  color-scheme: light dark;
+  --paper: #ffffff;
+  --ink: #000000;
+  --muted: #5c5c5c;      /* eyebrow meta, captions */
+  --tint: #f2f2f2;       /* code and table-header backgrounds */
+  --font-sans: "Helvetica Neue", Helvetica, Inter, Arial, system-ui, sans-serif;
+  --font-mono: "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --measure: 42rem;
+  --rule: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root { --paper: #000000; --ink: #ffffff; --muted: #a3a3a3; --tint: #141414; }
+}
+
+/* ---------------------------------------------------------------
+   2. base + type
+   Swiss grotesk at poster scale on a single measure.
+   --------------------------------------------------------------- */
+html { font-size: 17px; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 3rem 1.5rem 6rem;
+}
+
+h1 {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  line-height: .98;
+  letter-spacing: -.045em;
+  font-weight: 800;
+  margin: 0 0 1rem;
+  overflow-wrap: anywhere;
+}
+
+h2 {
+  font-size: 1.5rem;
+  letter-spacing: -.02em;
+  font-weight: 800;
+  border-top: var(--rule) solid var(--ink);
+  padding-top: .6rem;
+  margin: 2.5rem 0 .8rem;
+  overflow-wrap: anywhere;
+}
+
+h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  margin: 1.8rem 0 .5rem;
+  overflow-wrap: anywhere;
+}
+
+p { margin: .8rem 0; }
+
+a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 2px;
+}
+
+strong { font-weight: 800; }
+
+::selection { background: var(--ink); color: var(--paper); }
+
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+
+/* ---------------------------------------------------------------
+   3. content elements
+   Every class the content block may use. See references/elements.md.
+   --------------------------------------------------------------- */
+.eyebrow {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: .7rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  border-top: var(--rule) solid var(--ink);
+  padding-top: .5rem;
+  margin: 0 0 1.4rem;
+}
+
+.eyebrow span + span { color: var(--muted); }
+
+.lede {
+  font-size: 1.15rem;
+  font-weight: 500;
+  margin: 0 0 1.4rem;
+}
+
+/* The one permitted black callout. At most one per page. */
+.block {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 1rem 1.1rem;
+  margin: 1.4rem 0;
+}
+
+.block b:first-child {
+  display: block;
+  font-size: .68rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  opacity: .75;
+}
+
+.block p { margin: .4rem 0 0; }
+
+/* Numbered sequences only. */
+.steps {
+  list-style: none;
+  padding: 0;
+  margin: 1.4rem 0;
+}
+
+.steps li {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr;
+  border-top: 1px solid var(--ink);
+  padding: .5rem 0;
+}
+
+.steps li:last-child { border-bottom: 1px solid var(--ink); }
+
+.steps li span:first-child { font-weight: 800; }
+
+.so-what {
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 1.6rem 0 0;
+  border-top: var(--rule) solid var(--ink);
+  padding-top: .8rem;
+}
+
+ul, ol { padding-left: 1.3rem; }
+
+li { margin: .3rem 0; }
+
+blockquote {
+  margin: 1.2rem 0;
+  padding: .2rem 1rem;
+  border-left: var(--rule) solid var(--ink);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: .85em;
+  background: var(--tint);
+  padding: .1em .35em;
+}
+
+pre {
+  background: var(--tint);
+  border: 1px solid var(--ink);
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+pre code { background: none; padding: 0; }
+
+/* Wide content scrolls inside its own box, never the page. */
+.scroll { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.2rem 0;
+  font-size: .92rem;
+}
+
+th {
+  text-align: left;
+  font-size: .7rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  border-bottom: var(--rule) solid var(--ink);
+  padding: .5rem .6rem;
+  background: var(--tint);
+}
+
+td {
+  border-bottom: 1px solid var(--ink);
+  padding: .55rem .6rem;
+  vertical-align: top;
+}
+
+img, svg, video { max-width: 100%; }
+
+pre.mermaid { background: none; border: none; text-align: center; }
+
+/* ---------------------------------------------------------------
+   4. comment marks
+   Appearance only. Behavior arrives in phase 2.
+   --------------------------------------------------------------- */
+mark.ann-mark {
+  background: none;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 2px;
+  text-decoration-skip-ink: none;
+  cursor: pointer;
+}
+
+sup.ann-n {
+  display: inline-block;
+  font-size: .68rem;
+  font-weight: 800;
+  line-height: 1.15rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  text-align: center;
+  border: 2.5px solid var(--ink);
+  border-radius: 50%;
+  vertical-align: .15em;
+  margin-left: .25rem;
+  background: var(--paper);
+  color: var(--ink);
+  user-select: none;
+}
+
+/* ---------------------------------------------------------------
+   5. layer ui
+   Chrome the annotation layer builds. Never inside the content block.
+   --------------------------------------------------------------- */
+.ann-ui {
+  position: fixed;
+  right: 1.25rem;
+  bottom: 1.25rem;
+  z-index: 2147483000;
+  font-family: var(--font-sans);
+}
+
+.ann-copy,
+.ann-btn {
+  border: 2.5px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: 700 .72rem/1 var(--font-sans);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .7rem 1rem;
+  cursor: pointer;
+}
+
+.ann-btn { padding: .45rem .7rem; }
+
+.ann-copy:disabled,
+.ann-btn:disabled { opacity: .4; cursor: default; }
+
+.ann-pop {
+  position: absolute;
+  z-index: 2147483001;
+  width: min(22rem, 90vw);
+  background: var(--paper);
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  padding: .8rem;
+}
+
+.ann-pop textarea,
+.ann-fallback textarea {
+  box-sizing: border-box;
+  width: 100%;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+.ann-quote {
+  margin: 0 0 .5rem;
+  font-size: .8rem;
+  color: var(--muted);
+}
+
+.ann-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-top: .5rem;
+}
+
+.ann-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 4.5rem;
+  transform: translateX(-50%);
+  z-index: 2147483002;
+  background: var(--ink);
+  color: var(--paper);
+  padding: .5rem .8rem;
+  font-size: .8rem;
+}
+
+.ann-fallback {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2147483003;
+  width: min(34rem, 92vw);
+  background: var(--paper);
+  color: var(--ink);
+  border: 2.5px solid var(--ink);
+  padding: .8rem;
+}
+
+.ann-fallback textarea {
+  height: 12rem;
+  font-family: var(--font-mono);
+  font-size: .75rem;
+}
+
+.ann-ui[hidden],
+.ann-toast[hidden] { display: none; }
+
+@media print {
+  .ann-ui, .ann-pop, .ann-toast, .ann-fallback { display: none; }
+}
+</style>
+</head>
+<body>
+<main class="page">
+<article class="content">
+<!-- ANNOTATIONS:CONTENT:START -->
+<!-- ANNOTATIONS:CONTENT:END -->
+</article>
+</main>
+<script id="annotations-layer">
+(function () {
+  'use strict';
+  try {
+    var content = document.querySelector('article.content');
+    if (!content) throw new Error('content region missing');
+
+    /* Classes the layer owns. A selection touching any of them is ignored,
+       and their text never becomes part of a quote. */
+    var LAYER = ['ann-n', 'ann-ui', 'ann-pop', 'ann-toast', 'ann-fallback'];
+
+    var items = [];
+    var seq = 0;
+    var pop = null;
+    var toastTimer = null;
+    var copyBtn = null;
+
+    function collapse(value) {
+      return String(value == null ? '' : value).replace(/\s+/g, ' ').trim();
+    }
+
+    function isLayerNode(node) {
+      var el = node && node.nodeType === 1 ? node : node && node.parentNode;
+      while (el && el.nodeType === 1) {
+        for (var i = 0; i < LAYER.length; i++) {
+          if (el.classList && el.classList.contains(LAYER[i])) return true;
+        }
+        el = el.parentNode;
+      }
+      return false;
+    }
+
+    function indexOfId(id) {
+      for (var i = 0; i < items.length; i++) {
+        if (items[i].id === id) return i;
+      }
+      return -1;
+    }
+
+    /* ---- digest ---------------------------------------------------- */
+
+    function compose() {
+      var meta = document.querySelector('meta[name="annotations-slug"]');
+      var slug = meta ? meta.getAttribute('content') : '';
+      var out = '# Page annotations\n\nPage: ' + document.title + ' (' + slug + ')\n\n';
+      for (var i = 0; i < items.length; i++) {
+        out += items[i].n + '. > "' + items[i].quote + '"\n\n   ' + items[i].comment + '\n\n';
+      }
+      return out.replace(/\n+$/, '\n');
+    }
+
+    /* ---- painting -------------------------------------------------- */
+
+    /* Every text node the range covers, with the covered slice of each.
+       comparePoint is used instead of surroundContents so a range that
+       crosses element boundaries is handled the same as one that does not. */
+    function segments(range) {
+      var found = [];
+      var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null);
+      var node;
+      while ((node = walker.nextNode())) {
+        var len = node.nodeValue ? node.nodeValue.length : 0;
+        if (!len || isLayerNode(node)) continue;
+        var head = range.comparePoint(node, 0);
+        var tail = range.comparePoint(node, len);
+        if (tail < 0 || head > 0) continue;
+        var start = head < 0 ? range.startOffset : 0;
+        var end = tail > 0 ? range.endOffset : len;
+        if (start < 0) start = 0;
+        if (end > len) end = len;
+        if (end <= start) continue;
+        /* Whitespace between two blocks is its own text node. Wrapping it
+           would put a mark where the parent allows only li or td, and would
+           shift every :nth-child in the content. It shows nothing, so skip it. */
+        if (!collapse(node.nodeValue.slice(start, end))) continue;
+        found.push({ node: node, start: start, end: end });
+      }
+      return found;
+    }
+
+    function paint(range, id) {
+      var segs = segments(range);
+      if (!segs.length) return null;
+      var marks = [];
+      for (var i = 0; i < segs.length; i++) {
+        var text = segs[i].node;
+        if (segs[i].end < text.nodeValue.length) text.splitText(segs[i].end);
+        if (segs[i].start > 0) text = text.splitText(segs[i].start);
+        var mark = document.createElement('mark');
+        mark.className = 'ann-mark';
+        mark.setAttribute('data-ann-id', id);
+        text.parentNode.insertBefore(mark, text);
+        mark.appendChild(text);
+        marks.push(mark);
+      }
+      var last = marks[marks.length - 1];
+      var numeral = document.createElement('sup');
+      numeral.className = 'ann-n';
+      numeral.setAttribute('data-ann-id', id);
+      last.parentNode.insertBefore(numeral, last.nextSibling);
+      return marks;
+    }
+
+    function unwrap(el) {
+      var parent = el.parentNode;
+      if (!parent) return;
+      while (el.firstChild) parent.insertBefore(el.firstChild, el);
+      parent.removeChild(el);
+    }
+
+    /* Document order wins: an overlapping comment added later can still
+       come first on the page, so numbers follow the marks, not the array. */
+    function renumber() {
+      var order = [];
+      var marks = content.querySelectorAll('mark.ann-mark[data-ann-id]');
+      for (var i = 0; i < marks.length; i++) {
+        var id = marks[i].getAttribute('data-ann-id');
+        if (order.indexOf(id) === -1) order.push(id);
+      }
+      items.sort(function (a, b) {
+        var ia = order.indexOf(a.id);
+        var ib = order.indexOf(b.id);
+        if (ia === -1) ia = order.length;
+        if (ib === -1) ib = order.length;
+        return ia - ib;
+      });
+      for (var j = 0; j < items.length; j++) {
+        items[j].n = j + 1;
+        var numeral = content.querySelector('sup.ann-n[data-ann-id="' + items[j].id + '"]');
+        if (numeral) numeral.textContent = String(j + 1);
+      }
+    }
+
+    /* ---- public api ------------------------------------------------ */
+
+    function add(range, comment) {
+      var quote = collapse(range && range.toString ? range.toString() : '');
+      if (!quote) return null;
+      var id = 'a' + (++seq);
+      if (!paint(range, id)) return null;
+      var item = {
+        id: id,
+        n: items.length + 1,
+        quote: quote,
+        comment: String(comment == null ? '' : comment).trim(),
+        createdAt: new Date().toISOString()
+      };
+      items.push(item);
+      renumber();
+      refresh();
+      return item;
+    }
+
+    function remove(id) {
+      var idx = indexOfId(id);
+      if (idx === -1) return false;
+      var marks = content.querySelectorAll('mark.ann-mark[data-ann-id="' + id + '"]');
+      for (var i = 0; i < marks.length; i++) unwrap(marks[i]);
+      var numeral = content.querySelector('sup.ann-n[data-ann-id="' + id + '"]');
+      if (numeral && numeral.parentNode) numeral.parentNode.removeChild(numeral);
+      items.splice(idx, 1);
+      content.normalize();
+      renumber();
+      refresh();
+      return true;
+    }
+
+    function list() {
+      return items.map(function (item) {
+        return {
+          id: item.id,
+          n: item.n,
+          quote: item.quote,
+          comment: item.comment,
+          createdAt: item.createdAt
+        };
+      });
+    }
+
+    window.__annotations = { add: add, remove: remove, list: list, digest: compose };
+
+    /* ---- chrome ---------------------------------------------------- */
+
+    function makeButton(label, className) {
+      var el = document.createElement('button');
+      el.type = 'button';
+      el.className = className;
+      el.textContent = label;
+      return el;
+    }
+
+    var ui = document.createElement('div');
+    ui.className = 'ann-ui';
+    copyBtn = makeButton('Copy for agent (0)', 'ann-copy');
+    copyBtn.title = 'Comments live until you reload this page';
+    ui.appendChild(copyBtn);
+    document.body.appendChild(ui);
+
+    function refresh() {
+      if (!copyBtn) return;
+      copyBtn.textContent = 'Copy for agent (' + items.length + ')';
+      copyBtn.disabled = items.length === 0;
+    }
+
+    function toast(message) {
+      var el = document.querySelector('.ann-toast');
+      if (!el) {
+        el = document.createElement('div');
+        el.className = 'ann-toast';
+        document.body.appendChild(el);
+      }
+      el.textContent = message;
+      el.hidden = false;
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { el.hidden = true; }, 2400);
+    }
+
+    function fallback(text) {
+      var stale = document.querySelector('.ann-fallback');
+      if (stale && stale.parentNode) stale.parentNode.removeChild(stale);
+      var panel = document.createElement('div');
+      panel.className = 'ann-fallback';
+      var note = document.createElement('p');
+      note.className = 'ann-quote';
+      note.textContent = 'Copy failed. Select all and copy.';
+      var area = document.createElement('textarea');
+      area.readOnly = true;
+      area.value = text;
+      var row = document.createElement('div');
+      row.className = 'ann-row';
+      var close = makeButton('Close', 'ann-btn');
+      close.addEventListener('click', function () {
+        if (panel.parentNode) panel.parentNode.removeChild(panel);
+        copyBtn.focus();
+      });
+      row.appendChild(close);
+      panel.appendChild(note);
+      panel.appendChild(area);
+      panel.appendChild(row);
+      document.body.appendChild(panel);
+      area.focus();
+      area.select();
+    }
+
+    /* ---- popover --------------------------------------------------- */
+
+    function closePopover(focusTarget) {
+      if (pop && pop.parentNode) pop.parentNode.removeChild(pop);
+      pop = null;
+      if (focusTarget && focusTarget.focus) focusTarget.focus();
+    }
+
+    function place(el, rect) {
+      var top = rect.bottom + (window.scrollY || window.pageYOffset || 0) + 8;
+      var left = rect.left + (window.scrollX || window.pageXOffset || 0);
+      var limit = (document.documentElement.clientWidth || 0) - el.offsetWidth - 12;
+      if (limit > 12 && left > limit) left = limit;
+      if (left < 12) left = 12;
+      el.style.top = top + 'px';
+      el.style.left = left + 'px';
+    }
+
+    function openPopover(opts) {
+      closePopover(null);
+      var el = document.createElement('div');
+      el.className = 'ann-pop';
+
+      var excerpt = document.createElement('p');
+      excerpt.className = 'ann-quote';
+      excerpt.textContent = '"' + (opts.quote.length > 120 ? opts.quote.slice(0, 117) + '…' : opts.quote) + '"';
+
+      var area = document.createElement('textarea');
+      area.rows = 3;
+      area.value = opts.comment || '';
+
+      var row = document.createElement('div');
+      row.className = 'ann-row';
+      var save = makeButton('Save', 'ann-btn');
+      row.appendChild(save);
+      var del = null;
+      if (opts.id) {
+        del = makeButton('Delete', 'ann-btn');
+        row.appendChild(del);
+      }
+      var cancel = makeButton('Cancel', 'ann-btn');
+      row.appendChild(cancel);
+
+      el.appendChild(excerpt);
+      el.appendChild(area);
+      el.appendChild(row);
+      document.body.appendChild(el);
+      pop = el;
+      place(el, opts.rect);
+      area.focus();
+
+      function commit() {
+        var text = area.value.trim();
+        if (!text) {
+          closePopover(opts.focus || copyBtn);
+          return;
+        }
+        if (opts.id) {
+          var i = indexOfId(opts.id);
+          if (i !== -1) items[i].comment = text;
+        } else {
+          add(opts.range, text);
+          var selection = window.getSelection();
+          if (selection) selection.removeAllRanges();
+        }
+        refresh();
+        closePopover(copyBtn);
+      }
+
+      save.addEventListener('click', commit);
+      cancel.addEventListener('click', function () { closePopover(opts.focus || copyBtn); });
+      if (del) {
+        del.addEventListener('click', function () {
+          remove(opts.id);
+          closePopover(copyBtn);
+        });
+      }
+      el.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          closePopover(opts.focus || copyBtn);
+        } else if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
+          event.preventDefault();
+          commit();
+        }
+      });
+    }
+
+    /* ---- selection ------------------------------------------------- */
+
+    function currentRange() {
+      var selection = window.getSelection();
+      if (!selection || selection.isCollapsed || !selection.rangeCount) return null;
+      var range = selection.getRangeAt(0);
+      if (!range || range.collapsed) return null;
+      if (!content.contains(range.commonAncestorContainer)) return null;
+      if (isLayerNode(range.startContainer) || isLayerNode(range.endContainer)) return null;
+      if (!collapse(range.toString())) return null;
+      return range;
+    }
+
+    content.addEventListener('mouseup', function () {
+      setTimeout(function () {
+        var range = currentRange();
+        if (!range) return;
+        openPopover({
+          range: range.cloneRange(),
+          quote: collapse(range.toString()),
+          rect: range.getBoundingClientRect()
+        });
+      }, 0);
+    });
+
+    content.addEventListener('click', function (event) {
+      if (!event.target || !event.target.closest) return;
+      var anchor = event.target.closest('mark.ann-mark, sup.ann-n');
+      if (!anchor) return;
+      var selection = window.getSelection();
+      if (selection && !selection.isCollapsed) return;
+      var id = anchor.getAttribute('data-ann-id');
+      var i = indexOfId(id);
+      if (i === -1) return;
+      openPopover({
+        id: id,
+        comment: items[i].comment,
+        quote: items[i].quote,
+        rect: anchor.getBoundingClientRect()
+      });
+    });
+
+    document.addEventListener('mousedown', function (event) {
+      if (!pop || pop.contains(event.target)) return;
+      closePopover(null);
+    });
+
+    /* ---- clipboard ------------------------------------------------- */
+
+    copyBtn.addEventListener('click', function () {
+      var text = compose();
+      var count = items.length;
+      var settled = false;
+
+      function finish(copied) {
+        if (settled) return;
+        settled = true;
+        if (copied) toast('Copied ' + count + ' comment' + (count === 1 ? '' : 's') + ' for the agent');
+        else fallback(text);
+      }
+
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(function () { finish(true); }, function () { finish(false); });
+          /* A page opened from the file system can leave that promise pending
+             forever. Pressing the button must never look like nothing happened. */
+          setTimeout(function () { finish(false); }, 700);
+        } else {
+          finish(false);
+        }
+      } catch (err) {
+        finish(false);
+      }
+    });
+
+    refresh();
+    document.documentElement.dataset.annotationsReady = 'true';
+  } catch (e) {
+    console.error('annotations layer failed', e);
+  }
+})();
+</script>
+</body>
+</html>
