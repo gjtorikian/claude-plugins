@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="annotations-slug" content="">
-<title></title>
+<meta name="annotations-slug" content="demo">
+<title>An index is the book's table of contents.</title>
 <style>
 /* ---------------------------------------------------------------
    1. tokens
@@ -351,6 +351,43 @@ sup.ann-n {
 <main class="page">
 <article class="content">
 <!-- ANNOTATIONS:CONTENT:START -->
+<header>
+  <div class="eyebrow"><span>Explained for an engineering manager</span><span>2 min</span></div>
+  <h1>An index is the book's table of contents.</h1>
+  <p class="lede">Without one, every lookup reads the whole book.</p>
+</header>
+<div class="block"><b>The analogy</b><p>A 900-page manual with no contents page. To find "billing," you flip every page. An index is the contents page the database keeps for one column.</p></div>
+<ol class="steps">
+  <li><span>01</span><span data-selftest-target>Reads get fast because the lookup jumps straight to the page.</span></li>
+  <li><span>02</span><span>Writes get slightly slower: every insert updates the contents page too.</span></li>
+  <li><span>03</span><span>It costs disk. One index on <code>users.email</code> is cheap; forty are not.</span></li>
+</ol>
+<p class="so-what">So what: the fix for the slow customer search is one line, and it ships this week.</p>
+<script>
+window.addEventListener('DOMContentLoaded', function () {
+  var root = document.documentElement;
+  try {
+    var api = window.__annotations;
+    if (!api) throw new Error('layer API missing');
+    var target = document.querySelector('[data-selftest-target]');
+    var range = document.createRange();
+    range.selectNodeContents(target);
+    var quote = target.textContent.replace(/\s+/g, ' ').trim();
+    var a = api.add(range, 'Which table is this? Cite the migration.');
+    var expected = '# Page annotations\n\nPage: ' + document.title + ' (demo)\n\n1. > "' + quote + '"\n\n   Which table is this? Cite the migration.\n\n(1 comment)\n';
+    var got = api.digest();
+    if (got !== expected) throw new Error('digest mismatch: ' + JSON.stringify(got));
+    if (!document.querySelector('mark.ann-mark[data-ann-id="' + a.id + '"]')) throw new Error('mark not painted');
+    if (!document.querySelector('sup.ann-n')) throw new Error('numeral not painted');
+    api.remove(a.id);
+    if (api.list().length !== 0 || document.querySelector('mark.ann-mark')) throw new Error('remove left state behind');
+    root.setAttribute('data-annotations-selftest', 'pass');
+  } catch (e) {
+    console.error('selftest', e);
+    root.setAttribute('data-annotations-selftest', 'fail: ' + e.message);
+  }
+});
+</script>
 <!-- ANNOTATIONS:CONTENT:END -->
 </article>
 </main>

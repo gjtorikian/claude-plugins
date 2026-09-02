@@ -23,7 +23,7 @@ Every element and class the template styles. Compose the content block from thes
 | `strong` | Emphasis, rendered at weight 800. | `<p>This is <strong>the whole trick</strong>.</p>` |
 | `img`, `svg`, `video` | Local or inline media only, capped at the measure. No `src` pointing at the network, and no `xmlns` on inline SVG. | `<svg viewBox="0 0 10 10"><rect width="10" height="10" /></svg>` |
 | `pre.mermaid` | A mermaid diagram source block. Requires appending `mermaid-snippet.html` at the end of the content block. | `<pre class="mermaid">graph LR; A --> B;</pre>` |
-| `mark.ann-mark` + `sup.ann-n` | A comment mark: 3px underline plus a circled number. **Written by the annotation layer, not by you** — never place one by hand. | `<mark class="ann-mark">this passage<sup class="ann-n">1</sup></mark>` |
+| `mark.ann-mark` + `sup.ann-n` | A comment mark: a 3px underline on the passage, then a circled number after it. **Written by the annotation layer, not by you** — never place one by hand. | `<mark class="ann-mark" data-ann-id="a1">this passage</mark><sup class="ann-n" data-ann-id="a1">1</sup>` |
 
 ## Structure of a page
 

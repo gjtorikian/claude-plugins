@@ -83,6 +83,26 @@ Where `$f` is the path you just wrote. If no launcher exists — a container, CI
 
 Same title means the same slug means the same file. Overwrite it and open it again. Tell the user the file was replaced rather than added, so a second page with a title they meant to be different does not silently vanish.
 
+## Comments on the page
+
+The template already carries the annotation layer, so you never write it and never mention it in the content. On the rendered page the reader selects any text inside the content, types a comment into the popover that appears, and saves it; the passage gains a 3px underline and a circled number, and clicking either one reopens that comment to edit or delete. A fixed **Copy for agent (N)** button in the corner puts every comment on the clipboard as one markdown digest. If the browser refuses the clipboard — a `file://` page often does — the layer opens a panel holding the same text to copy by hand.
+
+The digest is what comes back to you:
+
+```
+# Page annotations
+
+Page: An index is the book's table of contents. (an-index-is-the-book-s-table-of-contents)
+
+1. > "Reads get fast because the lookup jumps straight to the page."
+
+   Which table is this? Cite the migration.
+
+(1 comment)
+```
+
+Comments live in memory only: a reload clears them, and nothing is written beside the page. The layer's API is `window.__annotations` — `add`, `remove`, `list`, and `digest` — available in the browser console when you need to inspect or drive the page yourself. The buttons on the page are the supported path for the reader.
+
 ## When the user pastes a digest
 
 A digest begins with `# Page annotations` and continues as a numbered list, each item quoting a passage from the page and giving a comment on it.
