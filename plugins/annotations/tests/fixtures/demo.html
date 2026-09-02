@@ -374,7 +374,7 @@ window.addEventListener('DOMContentLoaded', function () {
     range.selectNodeContents(target);
     var quote = target.textContent.replace(/\s+/g, ' ').trim();
     var a = api.add(range, 'Which table is this? Cite the migration.');
-    var expected = '# Page annotations\n\nPage: ' + document.title + ' (demo)\n\n1. > "' + quote + '"\n\n   Which table is this? Cite the migration.\n\n(1 comment)\n';
+    var expected = '# Page annotations\n\nPage: ' + document.title + ' (demo)\n\n1. > "' + quote + '"\n\n   Which table is this? Cite the migration.\n';
     var got = api.digest();
     if (got !== expected) throw new Error('digest mismatch: ' + JSON.stringify(got));
     if (!document.querySelector('mark.ann-mark[data-ann-id="' + a.id + '"]')) throw new Error('mark not painted');
@@ -439,7 +439,7 @@ window.addEventListener('DOMContentLoaded', function () {
       for (var i = 0; i < items.length; i++) {
         out += items[i].n + '. > "' + items[i].quote + '"\n\n   ' + items[i].comment + '\n\n';
       }
-      return out + '(' + items.length + ' comment' + (items.length === 1 ? '' : 's') + ')\n';
+      return out.replace(/\n+$/, '\n');
     }
 
     /* ---- painting -------------------------------------------------- */

@@ -97,8 +97,6 @@ Page: An index is the book's table of contents. (an-index-is-the-book-s-table-of
 1. > "Reads get fast because the lookup jumps straight to the page."
 
    Which table is this? Cite the migration.
-
-(1 comment)
 ```
 
 Comments live in memory only: a reload clears them, and nothing is written beside the page. The layer's API is `window.__annotations` — `add`, `remove`, `list`, and `digest` — available in the browser console when you need to inspect or drive the page yourself. The buttons on the page are the supported path for the reader.

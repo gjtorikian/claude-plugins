@@ -402,7 +402,7 @@ sup.ann-n {
       for (var i = 0; i < items.length; i++) {
         out += items[i].n + '. > "' + items[i].quote + '"\n\n   ' + items[i].comment + '\n\n';
       }
-      return out + '(' + items.length + ' comment' + (items.length === 1 ? '' : 's') + ')\n';
+      return out.replace(/\n+$/, '\n');
     }
 
     /* ---- painting -------------------------------------------------- */
