@@ -49,6 +49,22 @@ test('template makes no network references', () => {
     assert.doesNotMatch(template, /https?:\/\/|url\(|@import|@font-face/);
 });
 
+test('layer never opens the popover or moves focus straight from mouseup', () => {
+    const handler = template.match(/addEventListener\('mouseup',[\s\S]*?\n\s*\}\);/);
+    assert.ok(handler, 'mouseup handler present');
+    assert.doesNotMatch(handler[0], /openPopover|focus\(/);
+});
+
+test('layer owns the cue and heading anchor classes it paints', () => {
+    assert.match(template, /\.ann-cue \{/);
+    assert.match(template, /\.ann-anchor::before \{ content: '#'; \}/);
+    const layer = template.match(/var LAYER = \[([^\]]*)\];/);
+    assert.ok(layer, 'LAYER list present');
+    for (const name of ['ann-cue', 'ann-anchor']) {
+        assert.ok(layer[1].includes(`'${name}'`), `${name} is a layer class`);
+    }
+});
+
 test('fixture declares the demo slug', () => {
     assert.match(fixture, /name="annotations-slug" content="demo"/);
 });

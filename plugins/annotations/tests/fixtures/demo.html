@@ -301,6 +301,38 @@ sup.ann-n {
   color: var(--muted);
 }
 
+/* The comment cue: one small button beside a live selection. It is never
+   focused on its own, so the selection survives and copy still copies text. */
+.ann-cue {
+  position: absolute;
+  z-index: 2147483001;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Heading anchors. The layer gives every h2–h6 an id from its text and
+   appends one of these. The glyph is generated content, so it is never
+   selected, copied, or quoted. */
+.ann-anchor {
+  margin-left: .35em;
+  font-weight: 400;
+  text-decoration: none;
+  opacity: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.ann-anchor::before { content: '#'; }
+
+h2:hover .ann-anchor,
+h3:hover .ann-anchor,
+h4:hover .ann-anchor,
+h5:hover .ann-anchor,
+h6:hover .ann-anchor,
+.ann-anchor:focus-visible { opacity: 1; }
+
+h2, h3, h4, h5, h6 { scroll-margin-top: 1.5rem; }
+
 .ann-row {
   display: flex;
   flex-wrap: wrap;
@@ -340,10 +372,11 @@ sup.ann-n {
 }
 
 .ann-ui[hidden],
+.ann-cue[hidden],
 .ann-toast[hidden] { display: none; }
 
 @media print {
-  .ann-ui, .ann-pop, .ann-toast, .ann-fallback { display: none; }
+  .ann-ui, .ann-cue, .ann-anchor, .ann-pop, .ann-toast, .ann-fallback { display: none; }
 }
 </style>
 </head>
@@ -357,6 +390,8 @@ sup.ann-n {
   <p class="lede">Without one, every lookup reads the whole book.</p>
 </header>
 <div class="block"><b>The analogy</b><p>A 900-page manual with no contents page. To find "billing," you flip every page. An index is the contents page the database keeps for one column.</p></div>
+<h2>What it costs</h2>
+<p>Every index is a second copy of one column that the database keeps sorted on your behalf.</p>
 <ol class="steps">
   <li><span>01</span><span data-selftest-target>Reads get fast because the lookup jumps straight to the page.</span></li>
   <li><span>02</span><span>Writes get slightly slower: every insert updates the contents page too.</span></li>
@@ -381,6 +416,18 @@ window.addEventListener('DOMContentLoaded', function () {
     if (!document.querySelector('sup.ann-n')) throw new Error('numeral not painted');
     api.remove(a.id);
     if (api.list().length !== 0 || document.querySelector('mark.ann-mark')) throw new Error('remove left state behind');
+
+    var heading = document.querySelector('h2');
+    if (!heading || heading.id !== 'what-it-costs') throw new Error('heading id missing');
+    var anchor = heading.querySelector('a.ann-anchor');
+    if (!anchor || anchor.getAttribute('href') !== '#what-it-costs') throw new Error('heading anchor missing');
+    var headingRange = document.createRange();
+    headingRange.selectNodeContents(heading);
+    if (headingRange.toString() !== 'What it costs') throw new Error('anchor leaks into quotes: ' + JSON.stringify(headingRange.toString()));
+
+    var cue = document.querySelector('.ann-cue');
+    if (!cue || !cue.hidden) throw new Error('cue should start hidden');
+    if (document.querySelector('.ann-pop')) throw new Error('popover should not open on its own');
     root.setAttribute('data-annotations-selftest', 'pass');
   } catch (e) {
     console.error('selftest', e);
@@ -400,7 +447,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
     /* Classes the layer owns. A selection touching any of them is ignored,
        and their text never becomes part of a quote. */
-    var LAYER = ['ann-n', 'ann-ui', 'ann-pop', 'ann-toast', 'ann-fallback'];
+    var LAYER = ['ann-n', 'ann-ui', 'ann-cue', 'ann-anchor', 'ann-pop', 'ann-toast', 'ann-fallback'];
 
     var items = [];
     var seq = 0;
@@ -428,6 +475,37 @@ window.addEventListener('DOMContentLoaded', function () {
         if (items[i].id === id) return i;
       }
       return -1;
+    }
+
+    /* ---- heading anchors ------------------------------------------- */
+
+    /* Same rule as the page slug: lowercase, runs of non-alphanumerics to one
+       hyphen, trimmed, cut to 60. */
+    function slugify(text) {
+      return collapse(text).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
+    }
+
+    /* Every h2–h6 gets an id from its text (an id the author wrote wins) and
+       a trailing anchor link, so a section can be linked to from another
+       page, from the terminal, or from within the content itself. */
+    function anchorHeadings() {
+      var headings = content.querySelectorAll('h2, h3, h4, h5, h6');
+      for (var i = 0; i < headings.length; i++) {
+        var heading = headings[i];
+        if (heading.querySelector('.ann-anchor')) continue;
+        if (!heading.id) {
+          var base = slugify(heading.textContent) || 'section';
+          var id = base;
+          var n = 2;
+          while (document.getElementById(id)) id = base + '-' + (n++);
+          heading.id = id;
+        }
+        var link = document.createElement('a');
+        link.className = 'ann-anchor';
+        link.href = '#' + heading.id;
+        link.setAttribute('aria-label', 'Link to this section');
+        heading.appendChild(link);
+      }
     }
 
     /* ---- digest ---------------------------------------------------- */
@@ -736,16 +814,76 @@ window.addEventListener('DOMContentLoaded', function () {
       return range;
     }
 
-    content.addEventListener('mouseup', function () {
-      setTimeout(function () {
-        var range = currentRange();
-        if (!range) return;
-        openPopover({
-          range: range.cloneRange(),
-          quote: collapse(range.toString()),
-          rect: range.getBoundingClientRect()
-        });
-      }, 0);
+    /* Selecting text shows one small Comment button beside the selection and
+       nothing else. The popover opens only when the reader presses it, so the
+       selection stays live and the usual copy shortcut still copies the text. */
+    var cue = makeButton('Comment', 'ann-btn ann-cue');
+    cue.hidden = true;
+    var cueRange = null;
+    document.body.insertBefore(cue, ui);
+
+    function hideCue() {
+      cue.hidden = true;
+      cueRange = null;
+    }
+
+    /* Below the last line of the selection, ending where the selection ends. */
+    function placeCue(range) {
+      var rects = range.getClientRects();
+      var rect = rects.length ? rects[rects.length - 1] : range.getBoundingClientRect();
+      var top = rect.bottom + (window.scrollY || window.pageYOffset || 0) + 6;
+      var left = rect.right - cue.offsetWidth;
+      if (left < rect.left) left = rect.left;
+      var limit = (document.documentElement.clientWidth || 0) - cue.offsetWidth - 12;
+      if (limit > 12 && left > limit) left = limit;
+      if (left < 12) left = 12;
+      cue.style.top = top + 'px';
+      cue.style.left = (left + (window.scrollX || window.pageXOffset || 0)) + 'px';
+    }
+
+    function showCue() {
+      var range = currentRange();
+      if (!range || pop) {
+        hideCue();
+        return;
+      }
+      cueRange = range.cloneRange();
+      cue.hidden = false;
+      placeCue(range);
+    }
+
+    /* The listener sits on the document so a drag that ends in the margin
+       still counts; currentRange keeps the selection inside the content. */
+    document.addEventListener('mouseup', function () {
+      setTimeout(showCue, 0);
+    });
+
+    document.addEventListener('keyup', function (event) {
+      if (event.key === 'Shift') showCue();
+    });
+
+    document.addEventListener('selectionchange', function () {
+      if (!cue.hidden && !currentRange()) hideCue();
+    });
+
+    window.addEventListener('resize', function () {
+      if (!cue.hidden && cueRange) placeCue(cueRange);
+    });
+
+    cue.addEventListener('mousedown', function (event) {
+      /* Pressing the button must not move focus or drop the selection. */
+      event.preventDefault();
+    });
+
+    cue.addEventListener('click', function () {
+      var range = cueRange;
+      hideCue();
+      if (!range || range.collapsed) return;
+      openPopover({
+        range: range,
+        quote: collapse(range.toString()),
+        rect: range.getBoundingClientRect()
+      });
     });
 
     content.addEventListener('click', function (event) {
@@ -766,6 +904,7 @@ window.addEventListener('DOMContentLoaded', function () {
     });
 
     document.addEventListener('mousedown', function (event) {
+      if (!cue.hidden && !cue.contains(event.target)) hideCue();
       if (!pop || pop.contains(event.target)) return;
       closePopover(null);
     });
@@ -798,6 +937,7 @@ window.addEventListener('DOMContentLoaded', function () {
       }
     });
 
+    anchorHeadings();
     refresh();
     document.documentElement.dataset.annotationsReady = 'true';
   } catch (e) {

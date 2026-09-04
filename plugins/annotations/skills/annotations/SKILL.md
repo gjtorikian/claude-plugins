@@ -39,6 +39,7 @@ Write semantic HTML using only what that file lists. Rules:
 - **`.steps` only for real sequences.** If the items are not ordered in time or dependency, use a plain `<ul>`.
 - **The masthead goes inside the content block.** Open with a `<header>` holding the `.eyebrow`, the `<h1>`, and the `.lede`. Everything outside the content markers is identical on every page.
 - **Close with `.so-what`** — one sentence on why this matters to the reader.
+- **Headings are already linkable.** The layer gives every `h2`–`h6` an `id` slugged from its text by the page-slug rule (`<h2>What it costs</h2>` answers to `#what-it-costs`) and a `#` link that shows on hover. Write in-page links as `<a href="#what-it-costs">`, and write an `id` yourself only when a heading is too long to slug predictably.
 - **For a mermaid diagram**, write `<pre class="mermaid">…</pre>` where the diagram belongs, then append the entire contents of [references/mermaid-snippet.html](references/mermaid-snippet.html) at the *end of the content block*, still inside the markers. That snippet is the only place a network URL is allowed.
 
 ## Step 2: Render
@@ -85,7 +86,7 @@ Same title means the same slug means the same file. Overwrite it and open it aga
 
 ## Comments on the page
 
-The template already carries the annotation layer, so you never write it and never mention it in the content. On the rendered page the reader selects any text inside the content, types a comment into the popover that appears, and saves it; the passage gains a 3px underline and a circled number, and clicking either one reopens that comment to edit or delete. A fixed **Copy for agent (N)** button in the corner puts every comment on the clipboard as one markdown digest. If the browser refuses the clipboard — a `file://` page often does — the layer opens a panel holding the same text to copy by hand.
+The template already carries the annotation layer, so you never write it and never mention it in the content. On the rendered page the reader selects any text inside the content and a small **Comment** button appears beside the selection. The selection itself stays live, so copying text works as it does on any page; only pressing the button opens the popover to type a comment and save it. The passage then gains a 3px underline and a circled number, and clicking either one reopens that comment to edit or delete. A fixed **Copy for agent (N)** button in the corner puts every comment on the clipboard as one markdown digest. If the browser refuses the clipboard — a `file://` page often does — the layer opens a panel holding the same text to copy by hand.
 
 The digest is what comes back to you:
 

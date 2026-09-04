@@ -17,7 +17,7 @@
       "name": "annotations",
       "source": "./plugins/annotations",
       "description": "Render agent output as a self-contained black-and-white HTML page with an in-page annotation layer that hands comments back as a markdown digest.",
-      "version": "0.1.0"
+      "version": "0.2.0"
     },
     {
       "name": "eli5",
